@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace AoC2019
+namespace AoC2015
 {
     class Program
     {
