@@ -6,23 +6,25 @@ namespace Day01
     public class Tests
     {
         [Test]
-        [TestCase(12, 2)]
-        [TestCase(14, 2)]
-        [TestCase(1969, 654)]
-        [TestCase(100756, 33583)]
-        public void ComputeFuelMatchesExamples(int mass, int expected)
+        [TestCase("(())", 0)]
+        [TestCase("()()", 0)]
+        [TestCase("(((", 3)]
+        [TestCase("(()(()(", 3)]
+        [TestCase("))(((((", 3)]
+        [TestCase("())", -1)]
+        [TestCase("))(", -1)]
+        [TestCase(")))", -3)]
+        [TestCase(")())())", -3)]
+        public void WhichFloor(string directions, int expected)
         {
-            Assert.That(Program.ComputeFuel(mass), Is.EqualTo(expected));
+            Assert.That(Program.WhichFloor(directions), Is.EqualTo(expected));
         }
 
-        [Test]
-        [TestCase(12, 2)]
-        [TestCase(14, 2)]
-        [TestCase(1969, 966)]
-        [TestCase(100756, 50346)]
-        public void ComputeFuelRecursiveMatchesExamples(int mass, int expected)
+        [TestCase(")", -1, 1)]
+        [TestCase("()())", -1, 5)]
+        public void WhichIndex(string directions, int targetFloor, int expected)
         {
-            Assert.That(Program.ComputeFuelRecursive(mass), Is.EqualTo(expected));
+            Assert.That(Program.WhichIndex(directions, targetFloor), Is.EqualTo(expected));
         }
     }
 }
