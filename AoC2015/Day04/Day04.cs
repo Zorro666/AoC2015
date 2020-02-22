@@ -1,37 +1,18 @@
 ﻿using System;
 
 /*
---- Day 4: Secure Container ---
 
-You arrive at the Venus fuel depot only to discover it's protected by a password. The Elves had written the password on a sticky note, but someone threw it out.
+--- Day 4: The Ideal Stocking Stuffer ---
 
-However, they do remember a few key facts about the password:
+Santa needs help mining some AdventCoins (very similar to bitcoins) to use as gifts for all the economically forward-thinking little girls and boys.
 
-It is a six-digit number.
-The value is within the range given in your puzzle input.
-Two adjacent digits are the same (like 22 in 122345).
-Going from left to right, the digits never decrease; they only ever increase or stay the same(like 111123 or 135679).
-Other than the range rule, the following are true:
+To do this, he needs to find MD5 hashes which, in hexadecimal, start with at least five zeroes. The input to the MD5 hash is some secret key (your puzzle input, given below) followed by a number in decimal. To mine AdventCoins, you must find Santa the lowest positive number (no leading zeroes: 1, 2, 3, ...) that produces such a hash.
 
-111111 meets these criteria(double 11, never decreases).
-223450 does not meet these criteria(decreasing pair of digits 50).
-123789 does not meet these criteria(no double).
-How many different passwords within the range given in your puzzle input meet these criteria?
+For example:
 
-Your puzzle input is 168630-718098.
-
---- Part Two ---
-
-An Elf just remembered one more important detail: the two adjacent matching digits are not part of a larger group of matching digits.
-
-Given this additional criterion, but still ignoring the range rule, the following are now true:
-
-112233 meets these criteria because the digits never decrease and all repeated digits are exactly two digits long.
-123444 no longer meets the criteria (the repeated 44 is part of a larger group of 444).
-111122 meets the criteria (even though 1 is repeated more than twice, it still contains a double 22).
-How many different passwords within the range given in your puzzle input meet all of the criteria?
-
-Your puzzle input is still 168630-718098.
+If your secret key is abcdef, the answer is 609043, because the MD5 hash of abcdef609043 starts with five zeroes (000001dbbfa...), and it is the lowest such number to do so.
+If your secret key is pqrstuv, the lowest number it combines with to make an MD5 hash starting with five zeroes is 1048970; that is, the MD5 hash of pqrstuv1048970 looks like 000006136ef....
+Your puzzle input is yzbqklnj.
 
 */
 
@@ -39,68 +20,39 @@ namespace Day04
 {
     class Program
     {
-        static bool IsPairFound(int lengthOfMatch, bool part2)
+        Program(bool part1)
         {
-            if (lengthOfMatch >= 2)
+            if (part1)
             {
-                if (!part2)
+                var result1 = FindFiveZeroHash("yzbqklnj");
+                long expected = 2565;
+                Console.WriteLine($"Day04 : Result1 {result1}");
+                if (result1 != expected)
                 {
-                    return true;
-                }
-                else
-                {
-                    return (lengthOfMatch == 2);
+                    throw new InvalidOperationException($"Part1 is broken {result1} != {expected}");
                 }
             }
-            return false;
+            else
+            {
+                var result2 = 0;
+                long expected = 2639;
+                if (result2 != expected)
+                {
+                    throw new InvalidOperationException($"Part2 is broken {result2} != {expected}");
+                }
+            }
         }
 
-        public static bool ValidPassword(int password, bool part2)
+        public static long FindFiveZeroHash(string secretKey)
         {
-            string passwordAsString = password.ToString();
-            var previousDigit = passwordAsString[0];
-            int lengthOfMatch = 1;
-            bool foundPair = false;
-            for (var i = 1; i < 6; ++i)
-            {
-                var thisDigit = passwordAsString[i];
-                if (thisDigit < previousDigit)
-                {
-                    return false;
-                }
-                if (thisDigit == previousDigit)
-                {
-                    ++lengthOfMatch;
-                }
-                else
-                {
-                    foundPair |= IsPairFound(lengthOfMatch, part2);
-                    lengthOfMatch = 1;
-                }
-                previousDigit = thisDigit;
-            }
-            foundPair |= IsPairFound(lengthOfMatch, part2);
-            return foundPair;
+            return -123;
         }
 
         public static void Run()
         {
             Console.WriteLine("Day04 : Start");
-            var count1 = 0;
-            var count2 = 0;
-            for (var password = 168630; password <= 718098; ++password)
-            {
-                if (ValidPassword(password, false))
-                {
-                    ++count1;
-                }
-                if (ValidPassword(password, true))
-                {
-                    ++count2;
-                }
-            }
-            Console.WriteLine($"Day04 : Result1 {count1}");
-            Console.WriteLine($"Day04 : Result2 {count2}");
+            _ = new Program(true);
+            _ = new Program(false);
             Console.WriteLine("Day04 : End");
         }
     }
