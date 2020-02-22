@@ -42,7 +42,7 @@ namespace Day03
             string moves = AoC2015.Program.ReadLines(inputFile)[0];
             if (part1)
             {
-                var result1 = HowManyHousesVisited(moves);
+                var result1 = HowManyHousesVisited(moves, false);
                 long expected = 2565;
                 Console.WriteLine($"Day03 : Part1 {result1}");
                 if (result1 != expected)
@@ -52,8 +52,8 @@ namespace Day03
             }
             else
             {
-                var result2 = -666;
-                long expected = -123;
+                var result2 = HowManyHousesVisited(moves, true);
+                long expected = 2639;
                 if (result2 != expected)
                 {
                     throw new InvalidOperationException($"Part2 is broken {result2} != {expected}");
@@ -62,16 +62,24 @@ namespace Day03
             }
         }
 
-        public static long HowManyHousesVisited(string moves)
+        public static long HowManyHousesVisited(string moves, bool roboSanta)
         {
-            int x = 0;
-            int y = 0;
+            int santaX = 0;
+            int santaY = 0;
+            int roboSantaX = 0;
+            int roboSantaY = 0;
             var houses = new Dictionary<(int x, int y), int>(1024);
+            int x = santaX;
+            int y = santaY;
             houses.TryGetValue((x, y), out int count);
             count += 1;
             houses[(x, y)] = count;
+
+            bool moveSanta = true;
             foreach (var c in moves)
             {
+                x = moveSanta ? santaX : roboSantaX;
+                y = moveSanta ? santaY : roboSantaY;
                 switch (c)
                 {
                     case '^':
@@ -92,6 +100,21 @@ namespace Day03
                 houses.TryGetValue((x, y), out count);
                 count += 1;
                 houses[(x, y)] = count;
+                if (moveSanta)
+                {
+                    santaX = x;
+                    santaY = y;
+                }
+                else
+                {
+                    roboSantaX = x;
+                    roboSantaY = y;
+                }
+                moveSanta ^= true;
+                if (!roboSanta)
+                {
+                    moveSanta = true;
+                }
             }
             return houses.Count;
         }
