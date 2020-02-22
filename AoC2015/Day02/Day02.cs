@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 
 /*
 
@@ -15,107 +14,114 @@ A present with dimensions 2x3x4 requires 2*6 + 2*12 + 2*8 = 52 square feet of wr
 A present with dimensions 1x1x10 requires 2*1 + 2*10 + 2*10 = 42 square feet of wrapping paper plus 1 square foot of slack, for a total of 43 square feet.
 All numbers in the elves' list are in feet. How many total square feet of wrapping paper should they order?
 
+--- Part Two ---
+
+The elves are also running low on ribbon. Ribbon is all the same width, so they only have to worry about the length they need to order, which they would again like to be exact.
+
+The ribbon required to wrap a present is the shortest distance around its sides, or the smallest perimeter of any one face. Each present also requires a bow made out of ribbon as well; the feet of ribbon required for the perfect bow is equal to the cubic feet of volume of the present. Don't ask how they tie the bow, though; they'll never tell.
+
+For example:
+
+A present with dimensions 2x3x4 requires 2+2+3+3 = 10 feet of ribbon to wrap the present plus 2*3*4 = 24 feet of ribbon for the bow, for a total of 34 feet.
+A present with dimensions 1x1x10 requires 1+1+1+1 = 4 feet of ribbon to wrap the present plus 1*1*10 = 10 feet of ribbon for the bow, for a total of 14 feet.
+
+How many total feet of ribbon should they order?
 */
 
 namespace Day02
 {
     class Program
     {
+        static int sDimensionsCount = 0;
+        static (long l, long w, long h)[] sDimensions;
+
         private Program(string inputFile, bool part1)
         {
-            var inputs = ReadInput(inputFile);
+            var inputs = AoC2015.Program.ReadLines(inputFile);
+            ParseInput(inputs);
             if (part1)
             {
-                var result1 = -666;
+                var result1 = ComputeWrappingPaper();
+                long expected = 1588178;
+                if (result1 != expected)
+                {
+                    throw new InvalidProgramException($"Part1 is broken {result1} != {expected}");
+                }
                 Console.WriteLine($"Day02 : Result1 {result1}");
             }
             else
             {
-                var result2 = -666;
+                var result2 = ComputeRibbon();
                 Console.WriteLine($"Day02 : Result2 {result2}");
+                long expected = 3783758;
+                if (result2 != expected)
+                {
+                    throw new InvalidProgramException($"Part2 is broken {result2} != {expected}");
+                }
                 return;
             }
         }
 
-        private string[] ReadInput(string inputFile)
+        public static void ParseInput(string[] source)
         {
-            var source = File.ReadAllLines(inputFile);
-            return source;
+            int i = 0;
+            sDimensions = new (long l, long w, long h)[source.Length];
+            sDimensionsCount = 0;
+            foreach (var line in source)
+            {
+                var tokens = line.Split('x');
+                if (tokens.Length != 3)
+                {
+                    throw new InvalidProgramException($"Invalid line {line} does not have 3 tokens {tokens.Length}");
+
+                }
+                sDimensions[i].l = long.Parse(tokens[0]);
+                sDimensions[i].w = long.Parse(tokens[1]);
+                sDimensions[i].h = long.Parse(tokens[2]);
+                ++i;
+            }
+            sDimensionsCount = i;
         }
 
-        static private int[] ConvertSourceStringToInts(string source)
+        public static long ComputeRibbon()
         {
-            var sourceElements = source.Split(',');
-            var data = new int[sourceElements.Length];
-            var index = 0;
-            foreach (var element in sourceElements)
+            long total = 0;
+            for (var i = 0; i < sDimensionsCount; ++i)
             {
-                data[index] = Int32.Parse(element);
-                index++;
+                var dimension = sDimensions[i];
+
+                var l = dimension.l;
+                var w = dimension.w;
+                var h = dimension.h;
+                var minPerimeter = 2 * (l + w);
+                minPerimeter = Math.Min(minPerimeter, 2 * (w + h));
+                minPerimeter = Math.Min(minPerimeter, 2 * (h + l));
+                total += minPerimeter;
+                // + bow = l * w * h
+                total += l * w * h;
             }
-            return data;
+            return total;
         }
 
-        static private string ConvertIntsToResultString(int[] data)
+        public static long ComputeWrappingPaper()
         {
-            var sourceElements = new string[data.Length];
-            int index = 0;
-            foreach (var element in data)
+            long total = 0;
+            for (var i = 0; i < sDimensionsCount; ++i)
             {
-                sourceElements[index] = element.ToString();
-                index++;
-            }
-            var result = String.Join(',', sourceElements);
-            return result;
-        }
+                var dimension = sDimensions[i];
 
-        static public string RunProgram(string source, int address1, int address2)
-        {
-            var data = ConvertSourceStringToInts(source);
-            // fix 1202 alarm before running the program, 
-            // replace position 1 with the value 12 
-            // replace position 2 with the value 2.
-            if (address1 >= 0)
-            {
-                data[1] = address1;
-                if (address2 < 0)
-                {
-                    throw new ArgumentException("Address2 must be < 0 if address1 is < 0", "address2");
-                }
-                data[2] = address2;
+                // 2*l*w + 2*w*h + 2*h*l. 
+                // + the area of the smallest side.
+                var l = dimension.l;
+                var w = dimension.w;
+                var h = dimension.h;
+                total += 2 * (l * w + w * h + h * l);
+                var minArea = l * w;
+                minArea = Math.Min(minArea, w * h);
+                minArea = Math.Min(minArea, h * l);
+                total += minArea;
             }
-            int pc = 0;
-            var opcode = data[pc++];
-            while (opcode != 99)
-            {
-                if (pc >= data.Length)
-                {
-                    throw new InvalidDataException($"Invalid pc:{pc}");
-                }
-                var param1Index = data[pc++];
-                var param2Index = data[pc++];
-                var outputIndex = data[pc++];
-                var param1 = data[param1Index];
-                var param2 = data[param2Index];
-                int output;
-                if (opcode == 1)
-                {
-                    output = param1 + param2;
-                }
-                else if (opcode == 2)
-                {
-                    output = param1 * param2;
-                }
-                else
-                {
-                    throw new InvalidDataException($"Unknown opcode:{opcode}");
-                }
-                data[outputIndex] = output;
-                opcode = data[pc++];
-            };
-
-            var result = ConvertIntsToResultString(data);
-            return result;
+            return total;
         }
 
         public static void Run()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Diagnostics;
 
 namespace AoC2015
@@ -18,6 +19,13 @@ namespace AoC2015
                 Console.WriteLine($"Elapsed {milliSeconds}ms {seconds}s {minutes}mins");
             }
         }
+
+        public static string[] ReadLines(string inputFile)
+        {
+            var source = File.ReadAllLines(inputFile);
+            return source;
+        }
+
         static void Main(string[] args)
         {
             var day = -1;
