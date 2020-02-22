@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Security.Cryptography;
+using System.Text;
 
 /*
 
@@ -25,7 +27,7 @@ namespace Day04
             if (part1)
             {
                 var result1 = FindFiveZeroHash("yzbqklnj");
-                long expected = 2565;
+                long expected = 282749;
                 Console.WriteLine($"Day04 : Result1 {result1}");
                 if (result1 != expected)
                 {
@@ -45,7 +47,27 @@ namespace Day04
 
         public static long FindFiveZeroHash(string secretKey)
         {
-            return -123;
+            long result = 1;
+            using (var md5 = MD5.Create())
+            {
+                while (result < 10 * 1000 * 1000)
+                {
+                    var totalKey = $"{secretKey}{result}";
+                    byte[] inputBytes = Encoding.ASCII.GetBytes(totalKey);
+                    byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+                    // First five nibbles must be '0'
+                    if ((hashBytes[0] == 0) && (hashBytes[1] == 0) && ((hashBytes[2] & 0xF0) == 0))
+                    {
+                        if ((hashBytes[2] & 0xF) != 0)
+                        {
+                            return result;
+                        }
+                    }
+                    ++result;
+                }
+            }
+            throw new InvalidProgramException($"No match found {result}");
         }
 
         public static void Run()
