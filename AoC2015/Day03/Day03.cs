@@ -1,5 +1,5 @@
 ﻿using System;
-using System.IO;
+using System.Collections.Generic;
 
 /*
 
@@ -17,6 +17,20 @@ For example:
 ^>v< delivers presents to 4 houses in a square, including twice to the house at his starting/ending location.
 ^v^v^v^v^v delivers a bunch of presents to some very lucky children at only 2 houses.
 
+--- Part Two ---
+
+The next year, to speed up the process, Santa creates a robot version of himself, Robo-Santa, to deliver presents with him.
+
+Santa and Robo-Santa start at the same location (delivering two presents to the same starting house), then take turns moving based on instructions from the elf, who is eggnoggedly reading from the same script as the previous year.
+
+This year, how many houses receive at least one present?
+
+For example:
+
+^v delivers presents to 3 houses, because Santa goes north, and then Robo-Santa goes south.
+^>v< now delivers presents to 3 houses, and Santa and Robo-Santa end up back where they started.
+^v^v^v^v^v now delivers presents to 11 houses, with Santa going one direction and Robo-Santa going the other.
+
 */
 
 namespace Day03
@@ -29,7 +43,7 @@ namespace Day03
             if (part1)
             {
                 var result1 = HowManyHousesVisited(moves);
-                long expected = -123;
+                long expected = 2565;
                 Console.WriteLine($"Day03 : Part1 {result1}");
                 if (result1 != expected)
                 {
@@ -50,7 +64,36 @@ namespace Day03
 
         public static long HowManyHousesVisited(string moves)
         {
-            return 0;
+            int x = 0;
+            int y = 0;
+            var houses = new Dictionary<(int x, int y), int>(1024);
+            houses.TryGetValue((x, y), out int count);
+            count += 1;
+            houses[(x, y)] = count;
+            foreach (var c in moves)
+            {
+                switch (c)
+                {
+                    case '^':
+                        y -= 1;
+                        break;
+                    case 'v':
+                        y += 1;
+                        break;
+                    case '<':
+                        x -= 1;
+                        break;
+                    case '>':
+                        x += 1;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException($"Unknown move {c}");
+                }
+                houses.TryGetValue((x, y), out count);
+                count += 1;
+                houses[(x, y)] = count;
+            }
+            return houses.Count;
         }
 
         public static void Run()
