@@ -16,6 +16,10 @@ If your secret key is abcdef, the answer is 609043, because the MD5 hash of abcd
 If your secret key is pqrstuv, the lowest number it combines with to make an MD5 hash starting with five zeroes is 1048970; that is, the MD5 hash of pqrstuv1048970 looks like 000006136ef....
 Your puzzle input is yzbqklnj.
 
+--- Part Two ---
+
+Now find one that starts with six zeroes.
+
 */
 
 namespace Day04
@@ -36,13 +40,39 @@ namespace Day04
             }
             else
             {
-                var result2 = 0;
-                long expected = 2639;
+                var result2 = FindSixZeroHash("yzbqklnj");
+                long expected = 9962624;
+                Console.WriteLine($"Day04 : Result2 {result2}");
                 if (result2 != expected)
                 {
                     throw new InvalidOperationException($"Part2 is broken {result2} != {expected}");
                 }
             }
+        }
+
+        public static long FindSixZeroHash(string secretKey)
+        {
+            long result = 1;
+            using (var md5 = MD5.Create())
+            {
+                while (result < 10 * 1000 * 1000)
+                {
+                    var totalKey = $"{secretKey}{result}";
+                    byte[] inputBytes = Encoding.ASCII.GetBytes(totalKey);
+                    byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+                    // First 3 bytes must be 0 and nibble 7 must be non-zero
+                    if ((hashBytes[0] == 0) && (hashBytes[1] == 0) && (hashBytes[2] == 0))
+                    {
+                        if ((hashBytes[3] & 0xF0) != 0)
+                        {
+                            return result;
+                        }
+                    }
+                    ++result;
+                }
+            }
+            throw new InvalidProgramException($"No match found {result}");
         }
 
         public static long FindFiveZeroHash(string secretKey)
@@ -56,7 +86,7 @@ namespace Day04
                     byte[] inputBytes = Encoding.ASCII.GetBytes(totalKey);
                     byte[] hashBytes = md5.ComputeHash(inputBytes);
 
-                    // First five nibbles must be '0'
+                    // First five nibbles must be 0 and nibble 6 must be non-zero
                     if ((hashBytes[0] == 0) && (hashBytes[1] == 0) && ((hashBytes[2] & 0xF0) == 0))
                     {
                         if ((hashBytes[2] & 0xF) != 0)
