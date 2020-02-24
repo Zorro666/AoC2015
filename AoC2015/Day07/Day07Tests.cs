@@ -14,7 +14,7 @@ namespace Day07
 "x LSHIFT 2 -> f",
 "y RSHIFT 2 -> g",
 "NOT x -> h",
-"NOT y -> i"
+"NOT y -> ri"
     };
 
         public static IEnumerable<TestCaseData> TestCircuitTests => new[]
@@ -24,7 +24,7 @@ namespace Day07
             new TestCaseData(testCircuit, "f", 492).SetName("TestCircuit f 492"),
             new TestCaseData(testCircuit, "g", 114).SetName("TestCircuit g 114"),
             new TestCaseData(testCircuit, "h", 65412).SetName("TestCircuit h 65412"),
-            new TestCaseData(testCircuit, "i", 65079).SetName("TestCircuit i 65079"),
+            new TestCaseData(testCircuit, "ri", 65079).SetName("TestCircuit ri 65079"),
             new TestCaseData(testCircuit, "x", 123).SetName("TestCircuit x 123"),
             new TestCaseData(testCircuit, "y", 456).SetName("TestCircuit y 456")
         };
@@ -33,7 +33,7 @@ namespace Day07
         [TestCaseSource("TestCircuitTests")]
         public void TestCircuit(string[] instructions, string wire, long expected)
         {
-            Program.RunCircuit(instructions);
+            Program.CreateCircuit(instructions);
             Assert.That(Program.GetWire(wire), Is.EqualTo(expected));
         }
     }
