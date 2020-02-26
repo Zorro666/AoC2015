@@ -1,5 +1,5 @@
 ﻿using System;
-using System.IO;
+using System.Text.RegularExpressions;
 
 /*
 
@@ -23,6 +23,20 @@ Disregarding the whitespace in the file, what is the number of characters of cod
 
 For example, given the four strings above, the total number of characters of string code (2 + 5 + 10 + 6 = 23) minus the total number of characters in memory for string values (0 + 3 + 7 + 1 = 11) is 23 - 11 = 12.
 
+Your puzzle answer was 1333.
+
+--- Part Two ---
+
+Now, let's go the other way. In addition to finding the number of characters of code, you should now encode each code representation as a new string and find the number of characters of the new encoded representation, including the surrounding double quotes.
+
+For example:
+
+"" encodes to "\"\"", an increase from 2 characters to 6.
+"abc" encodes to "\"abc\"", an increase from 5 characters to 9.
+"aaa\"aaa" encodes to "\"aaa\\\"aaa\"", an increase from 10 characters to 16.
+"\x27" encodes to "\"\\x27\"", an increase from 6 characters to 11.
+Your task is to find the total number of characters to represent the newly encoded strings minus the number of characters of code in each original string literal. For example, for the strings above, the total encoded length (6 + 9 + 16 + 11 = 42) minus the characters in the original code representation (23, just like in the first part of this puzzle) is 42 - 23 = 19.
+
 */
 
 namespace Day08
@@ -31,11 +45,13 @@ namespace Day08
     {
         private Program(string inputFile, bool part1)
         {
+            var lines = AoC2015.Program.ReadLines(inputFile);
             if (part1)
             {
-                var result1 = -666;
+                (int fileCharacterCount, int memoryCharacterCount) = CountChars(lines);
+                var result1 = fileCharacterCount - memoryCharacterCount;
                 Console.WriteLine($"Day08 : Result1 {result1}");
-                int expected = 3176;
+                int expected = 1333;
                 if (result1 != expected)
                 {
                     throw new InvalidOperationException($"Part1 is broken {result1} != {expected}");
@@ -43,14 +59,68 @@ namespace Day08
             }
             else
             {
-                var result2 = -666;
+                (int fileCharacterCount, int escapedCharacterCount) = CountCharsEscaped(lines);
+                var result2 = escapedCharacterCount - fileCharacterCount;
                 Console.WriteLine($"Day08 : Result2 {result2}");
-                int expected = 3176;
+                int expected = 2046;
                 if (result2 != expected)
                 {
                     throw new InvalidOperationException($"Part2 is broken {result2} != {expected}");
                 }
             }
+        }
+
+        public static (int, int) CountChars(string[] lines)
+        {
+            int fileCharacterCount = 0;
+            int memoryCharacterCount = 0;
+            foreach (var line in lines)
+            {
+                fileCharacterCount += line.Length;
+                string parsed = line;
+                if (parsed[0] == '"')
+                {
+                    parsed = parsed.Substring(1);
+                    if (parsed[parsed.Length - 1] == '"')
+                    {
+                        parsed = parsed.Substring(0, parsed.Length - 1);
+                    }
+                    else
+                    {
+                        throw new InvalidProgramException($"Line must start and end with \" '{line}'");
+                    }
+                }
+                else
+                {
+                    throw new InvalidProgramException($"Line must start and end with \" '{line}'");
+                }
+                parsed = Regex.Unescape(parsed);
+                memoryCharacterCount += parsed.Length;
+            }
+            return (fileCharacterCount, memoryCharacterCount);
+        }
+
+        public static (int, int) CountCharsEscaped(string[] lines)
+        {
+            int fileCharacterCount = 0;
+            int memoryCharacterCount = 0;
+            foreach (var line in lines)
+            {
+                fileCharacterCount += line.Length;
+                string parsed = line;
+                if (parsed[0] != '"')
+                {
+                    throw new InvalidProgramException($"Line must start and end with \" '{line}'");
+                }
+                if (parsed[^1] != '"')
+                {
+                    throw new InvalidProgramException($"Line must start and end with \" '{line}'");
+                }
+                parsed = Regex.Escape(parsed);
+                parsed = parsed.Replace(@"""", @"\""");
+                memoryCharacterCount += (parsed.Length + 2);
+            }
+            return (fileCharacterCount, memoryCharacterCount);
         }
 
         public static void Run()
