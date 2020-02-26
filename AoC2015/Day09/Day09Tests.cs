@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace Day09
@@ -6,31 +7,23 @@ namespace Day09
     [TestFixture]
     public class Tests
     {
-        [Test]
-        [TestCase("1102,34915192,34915192,7,4,7,99,0", 16)]
-        public void RunProgramPart1LargeNumberOutput(string source, int expectedLength)
+        private static readonly string[] testRoute = new string[] {
+"London to Dublin = 464",
+"London to Belfast = 518",
+"Dublin to Belfast = 141"
+        };
+
+        public static IEnumerable<TestCaseData> TestRouteCases => new[]
         {
-            string allOutput = "";
-            Assert.That(Program.RunProgram(source, 0, ref allOutput).ToString().Length, Is.EqualTo(expectedLength));
-        }
+            new TestCaseData(testRoute, 605).SetName("TestRoute 605"),
+        };
 
         [Test]
-        [TestCase("104,1125899906842624,99", 1125899906842624L)]
-        [TestCase("1102,34915192,34915192,7,4,7,99,0", (34915192L * 34915192L))]
-        public void RunProgramPart1ExpectedOutput(string source, Int64 expected)
+        [TestCaseSource("TestRouteCases")]
+        public void ShortestRoute(string[] routes, int expectedShortestRoute)
         {
-            string allOutput = "";
-            Assert.That(Program.RunProgram(source, 0, ref allOutput), Is.EqualTo(expected));
-        }
-
-        [Test]
-        [TestCase("109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99")]
-        public void RunProgramPart1ExpectedStringOutput(string source)
-        {
-            string allOutput = "";
-            var expected = source;
-            Program.RunProgram(source, 0, ref allOutput);
-            Assert.That(allOutput, Is.EqualTo(expected));
+            Program.ParseRoutes(routes);
+            Assert.That(Program.ShortestRoute(), Is.EqualTo(expectedShortestRoute));
         }
     }
 }
