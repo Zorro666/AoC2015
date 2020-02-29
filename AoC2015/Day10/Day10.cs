@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 /*
 
@@ -35,12 +36,14 @@ namespace Day10
     {
         private Program(bool part1)
         {
+            string sequence = "1113122113";
             if (part1)
             {
-                string sequence = "1113122113";
+                double lastLen = sequence.Length;
                 for (var i = 0; i < 40; ++i)
                 {
                     sequence = LookSee(sequence);
+                    lastLen = sequence.Length;
                 }
                 var result1 = sequence.Length;
                 Console.WriteLine($"Day10 : Result1 {result1}");
@@ -52,9 +55,17 @@ namespace Day10
             }
             else
             {
-                var result2 = -123;
+                //double lambda = 1.303577269034296391257099112152551890730702504659404875754861390628550;
+                //double startLen = 360154;
+                double lastLen = sequence.Length;
+                for (var i = 0; i < 50; ++i)
+                {
+                    sequence = LookSee(sequence);
+                    lastLen = sequence.Length;
+                }
+                var result2 = sequence.Length;
                 Console.WriteLine($"Day10 : Result2 {result2}");
-                int expected = 804;
+                int expected = 5103798;
                 if (result2 != expected)
                 {
                     throw new InvalidOperationException($"Part2 is broken {result2} != {expected}");
@@ -64,16 +75,18 @@ namespace Day10
 
         public static string LookSee(string source)
         {
-            string reply = "";
-            char sequenceChar = '\0';
-            int sequenceCount = 0;
-            foreach (var c in source)
+            StringBuilder result = new StringBuilder();
+            char sequenceChar = source[0];
+            int sequenceCount = 1;
+            for (int i = 1; i < source.Length; ++i)
             {
+                char c = source[i];
                 if (c != sequenceChar)
                 {
                     if (sequenceCount > 0)
                     {
-                        reply += $"{sequenceCount}{sequenceChar}";
+                        result.Append(sequenceCount);
+                        result.Append(sequenceChar);
                     }
                     sequenceChar = c;
                     sequenceCount = 1;
@@ -85,9 +98,10 @@ namespace Day10
             }
             if (sequenceCount > 0)
             {
-                reply += $"{sequenceCount}{sequenceChar}";
+                result.Append(sequenceCount);
+                result.Append(sequenceChar);
             }
-            return reply;
+            return result.ToString();
         }
 
         public static void Run()
