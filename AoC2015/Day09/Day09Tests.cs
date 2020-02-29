@@ -13,17 +13,31 @@ namespace Day09
 "Dublin to Belfast = 141"
         };
 
-        public static IEnumerable<TestCaseData> TestRouteCases => new[]
+        public static IEnumerable<TestCaseData> ShortestRouteCases => new[]
         {
             new TestCaseData(testRoute, 605).SetName("TestRoute 605"),
         };
 
         [Test]
-        [TestCaseSource("TestRouteCases")]
+        [TestCaseSource("ShortestRouteCases")]
         public void ShortestRoute(string[] routes, int expectedShortestRoute)
         {
             Program.ParseRoutes(routes);
             Assert.That(Program.ShortestRoute(), Is.EqualTo(expectedShortestRoute));
         }
+
+        public static IEnumerable<TestCaseData> LongestRouteCases => new[]
+        {
+            new TestCaseData(testRoute, 982).SetName("TestRoute 982"),
+        };
+
+        [Test]
+        [TestCaseSource("LongestRouteCases")]
+        public void LongestRoute(string[] routes, int expectedLongestRoute)
+        {
+            Program.ParseRoutes(routes);
+            Assert.That(Program.LongestRoute(), Is.EqualTo(expectedLongestRoute));
+        }
+
     }
 }
