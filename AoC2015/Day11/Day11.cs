@@ -26,6 +26,10 @@ Given Santa's current password (your puzzle input), what should his next passwor
 
 Your puzzle input is cqjxjnds.
 
+--- Part Two ---
+
+Santa's password expired again. What's the next one?
+
 */
 
 namespace Day11
@@ -37,9 +41,9 @@ namespace Day11
             string input = "cqjxjnds";
             if (part1)
             {
-                var result1 = -666;
+                var result1 = NextValidPassword(input);
                 Console.WriteLine($"Day11 : Result1 {result1}");
-                int expected = 360154;
+                string expected = "cqjxxyzz";
                 if (result1 != expected)
                 {
                     throw new InvalidOperationException($"Part1 is broken {result1} != {expected}");
@@ -47,9 +51,9 @@ namespace Day11
             }
             else
             {
-                var result2 = -123;
+                var result2 = NextValidPassword(NextValidPassword(input));
                 Console.WriteLine($"Day11 : Result2 {result2}");
-                int expected = 5103798;
+                string expected = "cqkaabcc";
                 if (result2 != expected)
                 {
                     throw new InvalidOperationException($"Part2 is broken {result2} != {expected}");
@@ -57,14 +61,83 @@ namespace Day11
             }
         }
 
-        public static bool IsValidPassword(string password)
+        public static bool IsValidPassword(char[] password)
         {
-            return (password.Length % 7) == 3;
+            char prevPair = '\0';
+            char prevPrevChar = '\0';
+            char prevChar = '\0';
+            bool foundTwoPairs = false;
+            bool foundStraight = false;
+            foreach (var c in password)
+            {
+                if ((c == prevChar + 1) && (prevChar == prevPrevChar + 1))
+                {
+                    foundStraight = true;
+                }
+                if (c == prevChar)
+                {
+                    if (c != prevPair)
+                    {
+                        if (prevPair != '\0')
+                        {
+                            foundTwoPairs = true;
+                        }
+                        prevPair = c;
+                    }
+                }
+                if (c == 'i')
+                {
+                    return false;
+                }
+                if (c == 'o')
+                {
+                    return false;
+                }
+                if (c == 'l')
+                {
+                    return false;
+                }
+                prevPrevChar = prevChar;
+                prevChar = c;
+            }
+            if (!foundTwoPairs)
+            {
+                return false;
+            }
+            if (!foundStraight)
+            {
+                return false;
+            }
+            return true;
         }
 
+        // 8-characters
         public static string NextValidPassword(string password)
         {
-            return (password + "jake");
+            int count = 0;
+            char[] newPassword = password.ToCharArray();
+            do
+            {
+                int increment = 1;
+                for (int index = 7; index >= 0; --index)
+                {
+                    char c = newPassword[index];
+                    c = (char)(c + increment);
+                    increment = 0;
+                    if (c > 'z')
+                    {
+                        c = 'a';
+                        increment = 1;
+                    }
+                    newPassword[index] = c;
+                    if (increment == 0)
+                    {
+                        break;
+                    }
+                }
+            }
+            while (!IsValidPassword(newPassword));
+            return new string(newPassword);
         }
 
         public static void Run()

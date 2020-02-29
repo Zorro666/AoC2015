@@ -9,13 +9,11 @@ namespace Day11
         [TestCase("hijklmmn", false)]
         [TestCase("abbceffg", false)]
         [TestCase("abbcegjk", false)]
-        [TestCase("abcdefgh", true)]
         [TestCase("abcdffaa", true)]
-        [TestCase("ghijklmn", true)]
         [TestCase("ghjaabcc", true)]
         public void IsValidPassword(string password, bool expectedValid)
         {
-            Assert.That(Program.IsValidPassword(password), Is.EqualTo(expectedValid));
+            Assert.That(Program.IsValidPassword(password.ToCharArray()), Is.EqualTo(expectedValid));
         }
 
         [Test]
