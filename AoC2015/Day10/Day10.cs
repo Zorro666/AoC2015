@@ -19,6 +19,14 @@ Starting with the digits in your puzzle input, apply this process 40 times.What 
 
 Your puzzle input is 1113122113.
 
+Your puzzle answer was 360154.
+
+--- Part Two ---
+
+Neat, right? You might also enjoy hearing John Conway talking about this sequence (that's Conway of Conway's Game of Life fame).
+
+Now, starting again with the digits in your puzzle input, apply this process 50 times. What is the length of the new result?
+ 
 */
 
 namespace Day10
@@ -29,9 +37,14 @@ namespace Day10
         {
             if (part1)
             {
-                var result1 = -666;
+                string sequence = "1113122113";
+                for (var i = 0; i < 40; ++i)
+                {
+                    sequence = LookSee(sequence);
+                }
+                var result1 = sequence.Length;
                 Console.WriteLine($"Day10 : Result1 {result1}");
-                int expected = 207;
+                int expected = 360154;
                 if (result1 != expected)
                 {
                     throw new InvalidOperationException($"Part1 is broken {result1} != {expected}");
@@ -51,7 +64,29 @@ namespace Day10
 
         public static string LookSee(string source)
         {
-            string reply = source;
+            string reply = "";
+            char sequenceChar = '\0';
+            int sequenceCount = 0;
+            foreach (var c in source)
+            {
+                if (c != sequenceChar)
+                {
+                    if (sequenceCount > 0)
+                    {
+                        reply += $"{sequenceCount}{sequenceChar}";
+                    }
+                    sequenceChar = c;
+                    sequenceCount = 1;
+                }
+                else
+                {
+                    ++sequenceCount;
+                }
+            }
+            if (sequenceCount > 0)
+            {
+                reply += $"{sequenceCount}{sequenceChar}";
+            }
             return reply;
         }
 
