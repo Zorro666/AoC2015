@@ -39,11 +39,9 @@ namespace Day10
             string sequence = "1113122113";
             if (part1)
             {
-                double lastLen = sequence.Length;
                 for (var i = 0; i < 40; ++i)
                 {
                     sequence = LookSee(sequence);
-                    lastLen = sequence.Length;
                 }
                 var result1 = sequence.Length;
                 Console.WriteLine($"Day10 : Result1 {result1}");
@@ -56,12 +54,9 @@ namespace Day10
             else
             {
                 //double lambda = 1.303577269034296391257099112152551890730702504659404875754861390628550;
-                //double startLen = 360154;
-                double lastLen = sequence.Length;
                 for (var i = 0; i < 50; ++i)
                 {
                     sequence = LookSee(sequence);
-                    lastLen = sequence.Length;
                 }
                 var result2 = sequence.Length;
                 Console.WriteLine($"Day10 : Result2 {result2}");

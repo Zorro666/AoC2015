@@ -5,38 +5,25 @@ namespace Day11
     [TestFixture]
     public class Tests
     {
-        // Turn 0 = Left
-        //  0 , -1 => -1,  0
-        // -1 ,  0 =>  0, +1
-        //  0 , +1 => +1,  0
-        // +1 ,  0 =>  0, -1
         [Test]
-        [TestCase(+0, -1, -1, +0)]
-        [TestCase(-1, +0, +0, +1)]
-        [TestCase(+0, +1, +1, +0)]
-        [TestCase(+1, +0, +0, -1)]
-        public void TurnRobotLeft(int dx, int dy, int expectedDX, int expectedDY)
+        [TestCase("hijklmmn", false)]
+        [TestCase("abbceffg", false)]
+        [TestCase("abbcegjk", false)]
+        [TestCase("abcdefgh", true)]
+        [TestCase("abcdffaa", true)]
+        [TestCase("ghijklmn", true)]
+        [TestCase("ghjaabcc", true)]
+        public void IsValidPassword(string password, bool expectedValid)
         {
-            Program.TurnRobot(0, ref dx, ref dy);
-            Assert.That(dx, Is.EqualTo(expectedDX));
-            Assert.That(dy, Is.EqualTo(expectedDY));
+            Assert.That(Program.IsValidPassword(password), Is.EqualTo(expectedValid));
         }
 
-        // Turn 1 = Right
-        //  0 , -1 => +1,  0
-        // +1 ,  0 =>  0, +1
-        //  0 , +1 => -1,  0
-        // -1 ,  0 =>  0, -1
         [Test]
-        [TestCase(+0, -1, +1, +0)]
-        [TestCase(+1, +0, +0, +1)]
-        [TestCase(+0, +1, -1, +0)]
-        [TestCase(-1, +0, +0, -1)]
-        public void TurnRobotRight(int dx, int dy, int expectedDX, int expectedDY)
+        [TestCase("abcdefgh", "abcdffaa")]
+        [TestCase("ghijklmn", "ghjaabcc")]
+        public void NextValidPassword(string password, string expectedPassword)
         {
-            Program.TurnRobot(1, ref dx, ref dy);
-            Assert.That(dx, Is.EqualTo(expectedDX));
-            Assert.That(dy, Is.EqualTo(expectedDY));
+            Assert.That(Program.NextValidPassword(password), Is.EqualTo(expectedPassword));
         }
     }
 }
