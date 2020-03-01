@@ -114,7 +114,6 @@ namespace Day11
         // 8-characters
         public static string NextValidPassword(string password)
         {
-            int count = 0;
             char[] newPassword = password.ToCharArray();
             do
             {
