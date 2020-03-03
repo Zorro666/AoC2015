@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 /*
 
@@ -35,19 +36,40 @@ After trying every other seating arrangement in this hypothetical scenario, you 
 
 What is the total change in happiness for the optimal seating arrangement of the actual guest list?
 
+Your puzzle answer was 618.
+
+--- Part Two ---
+
+In all the commotion, you realize that you forgot to seat yourself. At this point, you're pretty apathetic toward the whole thing, and your happiness wouldn't really go up or down regardless of who you sit next to. You assume everyone else would be just as ambivalent about sitting next to you, too.
+
+So, add yourself to the list, and give all happiness relationships that involve you a score of 0.
+
+What is the total change in happiness for the optimal seating arrangement that actually includes yourself?
+
 */
 
 namespace Day13
 {
     class Program
     {
+        public struct Rule
+        {
+            public string person;
+            public string neighour;
+            public int happiness;
+        };
+        static List<string> sNames;
+        static List<Rule> sRules;
+
         private Program(string inputFile, bool part1)
         {
+            var lines = AoC2015.Program.ReadLines(inputFile);
+            ParseInput(lines);
             if (part1)
             {
-                var result1 = -666;
+                var result1 = ComputeOptimum();
                 Console.WriteLine($"Day13 : Result1 {result1}");
-                var expected = -123;
+                var expected = 618;
                 if (result1 != expected)
                 {
                     throw new InvalidProgramException($"Part1 result has been broken {result1}");
@@ -55,9 +77,18 @@ namespace Day13
             }
             else
             {
-                var result2 = -666;
+                foreach (var name in sNames)
+                {
+                    Rule rule;
+                    rule.person = "Jake";
+                    rule.neighour = name;
+                    rule.happiness = 0;
+                    sRules.Add(rule);
+                }
+                sNames.Add("Jake");
+                var result2 = ComputeOptimum();
                 Console.WriteLine($"Day13 : Result2 {result2}");
-                var expected = -123;
+                var expected = 601;
                 if (result2 != expected)
                 {
                     throw new InvalidProgramException($"Part2 result has been broken {result2}");
@@ -67,11 +98,126 @@ namespace Day13
 
         public static void ParseInput(string[] lines)
         {
+            sNames = new List<string>();
+            sRules = new List<Rule>(lines.Length);
+            foreach (var line in lines)
+            {
+                var tokens = line.Split(' ');
+                if (tokens.Length != 11)
+                {
+                    throw new InvalidProgramException($"Invalid line should have 11 tokens '{line}' {tokens.Length}");
+                }
+                if ((tokens[1] != "would") ||
+                    (tokens[4] != "happiness") ||
+                    (tokens[5] != "units") ||
+                    (tokens[6] != "by") ||
+                    (tokens[7] != "sitting") ||
+                    (tokens[8] != "next") ||
+                    (tokens[9] != "to"))
+                {
+                    throw new InvalidProgramException($"Invalid line '{line}'");
+                }
+                Rule rule;
+                rule.person = tokens[0];
+                rule.happiness = int.Parse(tokens[3]);
+                if (tokens[2] == "gain")
+                {
+                    rule.happiness *= 1;
+                }
+                else if (tokens[2] == "lose")
+                {
+                    rule.happiness *= -1;
+                }
+                else
+                {
+                    throw new InvalidProgramException($"Invalid line '{line}' should be {tokens[2]} 'gain' or 'lose'");
+                }
+                rule.neighour = tokens[10].TrimEnd('.');
+                sRules.Add(rule);
+                if (!sNames.Contains(rule.person))
+                {
+                    sNames.Add(rule.person);
+                }
+            }
         }
 
         public static int ComputeOptimum()
         {
-            return -123;
+            int maxHappiness = int.MinValue;
+            foreach (var start in sNames)
+            {
+                var seatingOrder = new List<string>
+                {
+                    start
+                };
+                MaxHappiness(ref seatingOrder, start, ref maxHappiness);
+            }
+            return maxHappiness;
+        }
+
+        public static void MaxHappiness(ref List<string> seatingOrder, string startingPerson, ref int maxHappiness)
+        {
+            foreach (var name in sNames)
+            {
+                if (seatingOrder.Contains(name))
+                {
+                    continue;
+                }
+                seatingOrder.Add(name);
+                if (seatingOrder.Count == sNames.Count)
+                {
+                    var totalHappiness = ComputeHappiness(seatingOrder);
+                    if (totalHappiness > maxHappiness)
+                    {
+                        maxHappiness = totalHappiness;
+                    }
+                }
+                else
+                {
+                    MaxHappiness(ref seatingOrder, name, ref maxHappiness);
+                }
+                seatingOrder.Remove(name);
+            }
+        }
+
+        static int ComputeHappiness(List<string> seatingOrder)
+        {
+            int happiness = 0;
+            var seatCount = seatingOrder.Count;
+            for (var i = 0; i < seatCount; ++i)
+            {
+                var leftNeigbourIndex = i - 1;
+                var rightNeighbourIndex = i + 1;
+                leftNeigbourIndex %= seatCount;
+                if (leftNeigbourIndex < 0)
+                {
+                    leftNeigbourIndex += seatCount;
+                }
+                rightNeighbourIndex %= seatCount;
+                if (rightNeighbourIndex < 0)
+                {
+                    rightNeighbourIndex += seatCount;
+                }
+
+                var person = seatingOrder[i];
+                var leftNeighbour = seatingOrder[leftNeigbourIndex];
+                var rightNeighbour = seatingOrder[rightNeighbourIndex];
+                foreach (var rule in sRules)
+                {
+                    if (rule.person == person)
+                    {
+                        if (rule.neighour == leftNeighbour)
+                        {
+                            happiness += rule.happiness;
+                        }
+                        if (rule.neighour == rightNeighbour)
+                        {
+                            happiness += rule.happiness;
+                        }
+                    }
+                }
+            }
+            return happiness;
         }
 
         public static void Run()
