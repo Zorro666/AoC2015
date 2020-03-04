@@ -7,138 +7,178 @@ namespace Day18
     public class Tests
     {
         private static readonly string[] mapA = {
-"#########",
-"#b.A.@.a#",
-"#########"
+".#.#.#",
+"...##.",
+"#....#",
+"..#...",
+"#.#..#",
+"####.."
+        };
+
+        private static readonly string[] mapA_frame1 = {
+"..##..",
+"..##.#",
+"...##.",
+"......",
+"#.....",
+"#.##.."
+        };
+
+        private static readonly string[] mapA_frame2 = {
+"..###.",
+"......",
+"..###.",
+"......",
+".#....",
+".#...."
+        };
+
+        private static readonly string[] mapA_frame3 = {
+"...#..",
+"......",
+"...#..",
+"..##..",
+"......",
+"......"
+        };
+
+        private static readonly string[] mapA_frame4 = {
+"......",
+"......",
+"..##..",
+"..##..",
+"......",
+"......"
         };
 
         private static readonly string[] mapB = {
-"########################",
-"#f.D.E.e.C.b.A.@.a.B.c.#",
-"######################.#",
-"#d.....................#",
-"########################"
+"##.#.#",
+"...##.",
+"#....#",
+"..#...",
+"#.#..#",
+"####.#"
         };
 
-        private static readonly string[] mapC = {
-"########################",
-"#...............b.C.D.f#",
-"#.######################",
-"#.....@.a.B.c.d.A.e.F.g#",
-"########################"
+        private static readonly string[] mapB_frame1 = {
+"#.##.#",
+"####.#",
+"...##.",
+"......",
+"#...#.",
+"#.####"
         };
 
-        private static readonly string[] mapD = {
-"#################",
-"#i.G..c...e..H.p#",
-"########.########",
-"#j.A..b...f..D.o#",
-"########@########",
-"#k.E..a...g..B.n#",
-"########.########",
-"#l.F..d...h..C.m#",
-"#################"
+        private static readonly string[] mapB_frame2 = {
+"#..#.#",
+"#....#",
+".#.##.",
+"...##.",
+".#..##",
+"##.###"
         };
 
-        private static readonly string[] mapE = {
-"########################",
-"#@..............ac.GI.b#",
-"###d#e#f################",
-"###A#B#C################",
-"###g#h#i################",
-"########################"
+        private static readonly string[] mapB_frame3 = {
+"#...##",
+"####.#",
+"..##.#",
+"......",
+"##....",
+"####.#"
         };
 
-        private static readonly string[] map2_A = {
-"#######",
-"#a.#Cd#",
-"##...##",
-"##.@.##",
-"##...##",
-"#cB#Ab#",
-"#######"
+        private static readonly string[] mapB_frame4 = {
+"#.####",
+"#....#",
+"...#..",
+".##...",
+"#.....",
+"#.#..#",
         };
 
-        private static readonly string[] map2_B = {
-"###############",
-"#d.ABC.#.....a#",
-"######...######",
-"######.@.######",
-"######...######",
-"#b.....#.....c#",
-"###############"
-        };
-        private static readonly string[] map2_C = {
-"#############",
-"#DcBa.#.GhKl#",
-"#.###...#I###",
-"#e#d#.@.#j#k#",
-"###C#...###J#",
-"#fEbA.#.FgHi#",
-"#############"
+        private static readonly string[] mapB_frame5 = {
+"##.###",
+".##..#",
+".##...",
+".##...",
+"#.#...",
+"##...#"
         };
 
-        private static readonly string[] map2_D = {
-"#############",
-"#g#f.D#..h#l#",
-"#F###e#E###.#",
-"#dCba...BcIJ#",
-"#####.@.#####",
-"#nK.L...G...#",
-"#M###N#H###.#",
-"#o#m..#i#jk.#",
-"#############"
-        };
-
-        public static IEnumerable<TestCaseData> ShortestPathCases => new[]
+        public static IEnumerable<TestCaseData> SimulateCases => new[]
         {
-            new TestCaseData(mapA, 8).SetName("ShorttestPath A 8"),
-            new TestCaseData(mapB, 86).SetName("ShorttestPath B 86"),
-            new TestCaseData(mapC, 132).SetName("ShorttestPath C 132"),
-            new TestCaseData(mapD, 136).SetName("ShorttestPath D 136").Explicit("Takes 10mins+ to run"),
-            new TestCaseData(mapE, 81).SetName("ShorttestPath E 81")
+            new TestCaseData(mapA, 0, mapA).SetName("Simulate 0"),
+            new TestCaseData(mapA, 1, mapA_frame1).SetName("Simulate 1"),
+            new TestCaseData(mapA, 2, mapA_frame2).SetName("Simulate 2"),
+            new TestCaseData(mapA, 3, mapA_frame3).SetName("Simulate 3"),
+            new TestCaseData(mapA, 4, mapA_frame4).SetName("Simulate 4")
         };
 
         [Test]
-        [TestCaseSource("ShortestPathCases")]
-        public void ShortestPath(string[] map, int expectedStepCount)
+        [TestCaseSource("SimulateCases")]
+        public void Simulate(string[] map, int numSteps, string[] expectedState)
         {
             Program.ParseMap(map, false);
-            Program.OutputMap(false);
-            Assert.That(Program.ShortestPath(), Is.EqualTo(expectedStepCount));
+            Program.Simulate(numSteps);
+            var output = Program.GetMap();
+            Assert.That(output, Is.EqualTo(expectedState));
+            Assert.That(output.Length, Is.EqualTo(expectedState.Length));
+            for (var i = 0; i < expectedState.Length; ++i)
+            {
+                Assert.That(output[i], Is.EqualTo(expectedState[i]));
+            }
         }
 
-        public static IEnumerable<TestCaseData> NavigateToKeyCases => new[]
+        public static IEnumerable<TestCaseData> LightsOnCountCases => new[]
         {
-            new TestCaseData(mapA, 5, 1, 0, 0).SetName("Navigate @ -> a [] 2").Returns(2),
-            new TestCaseData(mapA, 5, 1, 1, 0).SetName("Navigate @ -> b [] -1").Returns(-1),
-            new TestCaseData(mapA, 5, 1, 1, 1).SetName("Navigate @ -> b [a] 4").Returns(4),
+            new TestCaseData(mapA, 4, 4).SetName("LightsOnCount 4 = 4")
         };
 
         [Test]
-        [TestCaseSource("NavigateToKeyCases")]
-        public int Navigate(string[] map, int fromX, int fromY, int toKeyIndex, int collectedKeys)
+        [TestCaseSource("LightsOnCountCases")]
+        public void LightsOnCount(string[] map, int numSteps, int expectedCount)
         {
             Program.ParseMap(map, false);
-            Program.OutputMap(false);
-            return Program.NavigateToKey(fromX, fromY, toKeyIndex, collectedKeys);
+            Program.Simulate(numSteps);
+            Assert.That(Program.LightsOnCount(), Is.EqualTo(expectedCount));
         }
 
-        public static IEnumerable<TestCaseData> ShortestPathCasesPart2 => new[]
+        public static IEnumerable<TestCaseData> SimulateCasesPart2 => new[]
         {
-            new TestCaseData(map2_A, 8).SetName("ShorttestPathPart2 A 8"),
-            new TestCaseData(map2_B, 24).SetName("ShorttestPathPart2 B 24"),
-            new TestCaseData(map2_C, 32).SetName("ShorttestPathPart2 C 32"),
-            new TestCaseData(map2_D, 72).SetName("ShorttestPathPart2 D 72")
+            new TestCaseData(mapA, 0, mapB).SetName("SimulatePart2 0"),
+            new TestCaseData(mapA, 1, mapB_frame1).SetName("SimulatePart2 1"),
+            new TestCaseData(mapA, 2, mapB_frame2).SetName("SimulatePart2 2"),
+            new TestCaseData(mapA, 3, mapB_frame3).SetName("SimulatePart2 3"),
+            new TestCaseData(mapA, 4, mapB_frame4).SetName("SimulatePart2 4"),
+            new TestCaseData(mapA, 5, mapB_frame5).SetName("SimulatePart2 5")
         };
 
         [Test]
-        [TestCaseSource("ShortestPathCasesPart2")]
-        public void ShortestPathPart2(string[] map, int expectedStepCount)
+        [TestCaseSource("SimulateCasesPart2")]
+        public void SimulatePart2(string[] map, int numSteps, string[] expectedState)
         {
             Program.ParseMap(map, true);
-            Program.OutputMap(false);
-            Assert.That(Program.ShortestPath(), Is.EqualTo(expectedStepCount));
+            Program.Simulate(numSteps);
+            var output = Program.GetMap();
+            Assert.That(output, Is.EqualTo(expectedState));
+            Assert.That(output.Length, Is.EqualTo(expectedState.Length));
+            for (var i = 0; i < expectedState.Length; ++i)
+            {
+                Assert.That(output[i], Is.EqualTo(expectedState[i]));
+            }
+        }
+        public static IEnumerable<TestCaseData> LightsOnCountCasesPart2 => new[]
+        {
+            new TestCaseData(mapB, 5, 17).SetName("LightsOnCountPart2 5 = 17")
+        };
+
+        [Test]
+        [TestCaseSource("LightsOnCountCasesPart2")]
+        public void LightsOnCountPart2(string[] map, int numSteps, int expectedCount)
+        {
+            Program.ParseMap(map, true);
+            Program.Simulate(numSteps);
+            Assert.That(Program.LightsOnCount(), Is.EqualTo(expectedCount));
         }
     }
 }
