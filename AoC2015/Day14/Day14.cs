@@ -29,7 +29,9 @@ Seeing how reindeer move in bursts, Santa decides he's not pleased with the old 
 
 Instead, at the end of each second, he awards one point to the reindeer currently in the lead. (If there are multiple reindeer tied for the lead, they each get one point.) He keeps the traditional 2503 second time limit, of course, as doing otherwise would be entirely ridiculous.
 
-Given the example reindeer from above, after the first second, Dancer is in the lead and gets one point. He stays in the lead until several seconds into Comet's second burst: after the 140th second, Comet pulls into the lead and gets his first point. Of course, since Dancer had been in the lead for the 139 seconds before that, he has accumulated 139 points by the 140th second.
+Given the example reindeer from above, after the first second, Dancer is in the lead and gets one point. 
+He stays in the lead until several seconds into Comet's second burst: after the 140th second, Comet pulls into the lead and gets his first point. 
+Of course, since Dancer had been in the lead for the 139 seconds before that, he has accumulated 139 points by the 140th second.
 
 After the 1000th second, Dancer has accumulated 689 points, while poor Comet, our old champion, only has 312. So, with the new scoring system, Dancer would win (if the race ended at 1000 seconds).
 
@@ -67,9 +69,9 @@ namespace Day14
             }
             else
             {
-                var result2 = -123;
+                var result2 = WinningPoints(2503);
                 Console.WriteLine($"Day14 Result2:{result2}");
-                var expected = -666;
+                var expected = 1102;
                 if (result2 != expected)
                 {
                     throw new InvalidProgramException($"Part2 is broken {result2} != {expected}");
@@ -131,6 +133,61 @@ namespace Day14
                 maxDistance = Math.Max(maxDistance, distance);
             }
             return maxDistance;
+        }
+
+        public static int Points(string reindeer, int time)
+        {
+            var points = new int[sRules.Length];
+            var reindeerPoints = 0;
+            var distances = new int[sRules.Length];
+            for (var t = 1; t <= time; ++t)
+            {
+                var maxDistance = int.MinValue;
+                for (var r = 0; r < sRules.Length; ++r)
+                {
+                    Rule rule = sRules[r];
+                    distances[r] = Distance(rule.speed, rule.speedTime, rule.restTime, t);
+                    maxDistance = Math.Max(maxDistance, distances[r]);
+                }
+                for (var r = 0; r < sRules.Length; ++r)
+                {
+                    if (distances[r] == maxDistance)
+                    {
+                        ++points[r];
+                        if (sRules[r].name == reindeer)
+                        {
+                            reindeerPoints = points[r];
+                        }
+                    }
+                }
+            }
+            return reindeerPoints;
+        }
+
+        public static int WinningPoints(int time)
+        {
+            var points = new int[sRules.Length];
+            var maxPoints = int.MinValue;
+            var distances = new int[sRules.Length];
+            for (var t = 1; t <= time; ++t)
+            {
+                var maxDistance = int.MinValue;
+                for (var r = 0; r < sRules.Length; ++r)
+                {
+                    Rule rule = sRules[r];
+                    distances[r] = Distance(rule.speed, rule.speedTime, rule.restTime, t);
+                    maxDistance = Math.Max(maxDistance, distances[r]);
+                }
+                for (var r = 0; r < sRules.Length; ++r)
+                {
+                    if (distances[r] == maxDistance)
+                    {
+                        ++points[r];
+                        maxPoints = Math.Max(maxPoints, points[r]);
+                    }
+                }
+            }
+            return maxPoints;
         }
 
         public static void Run()
