@@ -1,92 +1,39 @@
 ﻿using System;
-using System.IO;
 
 /*
---- Day 16: Flawed Frequency Transmission ---
 
-You're 3/4ths of the way through the gas giants. Not only do roundtrip signals to Earth take five hours, but the signal quality is quite bad as well. You can clean up the signal with the Flawed Frequency Transmission algorithm, or FFT.
+--- Day 16: Aunt Sue ---
 
-As input, FFT takes a list of numbers. In the signal you received (your puzzle input), each number is a single digit: data like 15243 represents the sequence 1, 5, 2, 4, 3.
+Your Aunt Sue has given you a wonderful gift, and you'd like to send her a thank you card. However, there's a small problem: she signed it "From, Aunt Sue".
 
-FFT operates in repeated phases. In each phase, a new list is constructed with the same length as the input list. This new list is also used as the input for the next phase.
+You have 500 Aunts named "Sue".
 
-Each element in the new list is built by multiplying every value in the input list by a value in a repeating pattern and then adding up the results. So, if the input list were 9, 8, 7, 6, 5 and the pattern for a given element were 1, 2, 3, the result would be 9*1 + 8*2 + 7*3 + 6*1 + 5*2 (with each input element on the left and each value in the repeating pattern on the right of each multiplication). Then, only the ones digit is kept: 38 becomes 8, -17 becomes 7, and so on.
+So, to avoid sending the card to the wrong person, you need to figure out which Aunt Sue (which you conveniently number 1 to 500, for sanity) gave you the gift. You open the present and, as luck would have it, good ol' Aunt Sue got you a My First Crime Scene Analysis Machine! Just what you wanted. Or needed, as the case may be.
 
-While each element in the output array uses all of the same input array elements, the actual repeating pattern to use depends on which output element is being calculated. The base pattern is 0, 1, 0, -1. Then, repeat each value in the pattern a number of times equal to the position in the output list being considered. Repeat once for the first element, twice for the second element, three times for the third element, and so on. So, if the third element of the output list is being calculated, repeating the values would produce: 0, 0, 0, 1, 1, 1, 0, 0, 0, -1, -1, -1.
+The My First Crime Scene Analysis Machine (MFCSAM for short) can detect a few specific compounds in a given sample, as well as how many distinct kinds of those compounds there are. According to the instructions, these are what the MFCSAM can detect:
 
-When applying the pattern, skip the very first value exactly once. (In other words, offset the whole pattern left by one.) So, for the second element of the output list, the actual pattern used would be: 0, 1, 1, 0, 0, -1, -1, 0, 0, 1, 1, 0, 0, -1, -1, ....
+children, by human DNA age analysis.
+cats. It doesn't differentiate individual breeds.
+Several seemingly random breeds of dog: samoyeds, pomeranians, akitas, and vizslas.
+goldfish. No other kinds of fish.
+trees, all in one group.
+cars, presumably by exhaust or gasoline or something.
+perfumes, which is handy, since many of your Aunts Sue wear a few kinds.
+In fact, many of your Aunts Sue have many of these. You put the wrapping from the gift into the MFCSAM. It beeps inquisitively at you a few times and then prints out a message on ticker tape:
 
-After using this process to calculate each element of the output list, the phase is complete, and the output list of this phase is used as the new input list for the next phase, if any.
+children: 3
+cats: 7
+samoyeds: 2
+pomeranians: 3
+akitas: 0
+vizslas: 0
+goldfish: 5
+trees: 3
+cars: 2
+perfumes: 1
+You make a list of the things you can remember about each Aunt Sue. Things missing from your list aren't zero - you simply don't remember the value.
 
-Given the input signal 12345678, below are four phases of FFT. Within each phase, each output digit is calculated on a single line with the result at the far right; each multiplication operation shows the input digit on the left and the pattern value on the right:
-
-Input signal: 12345678
-
-1*1  + 2*0  + 3*-1 + 4*0  + 5*1  + 6*0  + 7*-1 + 8*0  = 4
-1*0  + 2*1  + 3*1  + 4*0  + 5*0  + 6*-1 + 7*-1 + 8*0  = 8
-1*0  + 2*0  + 3*1  + 4*1  + 5*1  + 6*0  + 7*0  + 8*0  = 2
-1*0  + 2*0  + 3*0  + 4*1  + 5*1  + 6*1  + 7*1  + 8*0  = 2
-1*0  + 2*0  + 3*0  + 4*0  + 5*1  + 6*1  + 7*1  + 8*1  = 6
-1*0  + 2*0  + 3*0  + 4*0  + 5*0  + 6*1  + 7*1  + 8*1  = 1
-1*0  + 2*0  + 3*0  + 4*0  + 5*0  + 6*0  + 7*1  + 8*1  = 5
-1*0  + 2*0  + 3*0  + 4*0  + 5*0  + 6*0  + 7*0  + 8*1  = 8
-
-After 1 phase: 48226158
-
-4*1  + 8*0  + 2*-1 + 2*0  + 6*1  + 1*0  + 5*-1 + 8*0  = 3
-4*0  + 8*1  + 2*1  + 2*0  + 6*0  + 1*-1 + 5*-1 + 8*0  = 4
-4*0  + 8*0  + 2*1  + 2*1  + 6*1  + 1*0  + 5*0  + 8*0  = 0
-4*0  + 8*0  + 2*0  + 2*1  + 6*1  + 1*1  + 5*1  + 8*0  = 4
-4*0  + 8*0  + 2*0  + 2*0  + 6*1  + 1*1  + 5*1  + 8*1  = 0
-4*0  + 8*0  + 2*0  + 2*0  + 6*0  + 1*1  + 5*1  + 8*1  = 4
-4*0  + 8*0  + 2*0  + 2*0  + 6*0  + 1*0  + 5*1  + 8*1  = 3
-4*0  + 8*0  + 2*0  + 2*0  + 6*0  + 1*0  + 5*0  + 8*1  = 8
-
-After 2 phases: 34040438
-
-3*1  + 4*0  + 0*-1 + 4*0  + 0*1  + 4*0  + 3*-1 + 8*0  = 0
-3*0  + 4*1  + 0*1  + 4*0  + 0*0  + 4*-1 + 3*-1 + 8*0  = 3
-3*0  + 4*0  + 0*1  + 4*1  + 0*1  + 4*0  + 3*0  + 8*0  = 4
-3*0  + 4*0  + 0*0  + 4*1  + 0*1  + 4*1  + 3*1  + 8*0  = 1
-3*0  + 4*0  + 0*0  + 4*0  + 0*1  + 4*1  + 3*1  + 8*1  = 5
-3*0  + 4*0  + 0*0  + 4*0  + 0*0  + 4*1  + 3*1  + 8*1  = 5
-3*0  + 4*0  + 0*0  + 4*0  + 0*0  + 4*0  + 3*1  + 8*1  = 1
-3*0  + 4*0  + 0*0  + 4*0  + 0*0  + 4*0  + 3*0  + 8*1  = 8
-
-After 3 phases: 03415518
-
-0*1  + 3*0  + 4*-1 + 1*0  + 5*1  + 5*0  + 1*-1 + 8*0  = 0
-0*0  + 3*1  + 4*1  + 1*0  + 5*0  + 5*-1 + 1*-1 + 8*0  = 1
-0*0  + 3*0  + 4*1  + 1*1  + 5*1  + 5*0  + 1*0  + 8*0  = 0
-0*0  + 3*0  + 4*0  + 1*1  + 5*1  + 5*1  + 1*1  + 8*0  = 2
-0*0  + 3*0  + 4*0  + 1*0  + 5*1  + 5*1  + 1*1  + 8*1  = 9
-0*0  + 3*0  + 4*0  + 1*0  + 5*0  + 5*1  + 1*1  + 8*1  = 4
-0*0  + 3*0  + 4*0  + 1*0  + 5*0  + 5*0  + 1*1  + 8*1  = 9
-0*0  + 3*0  + 4*0  + 1*0  + 5*0  + 5*0  + 1*0  + 8*1  = 8
-
-After 4 phases: 01029498
-Here are the first eight digits of the final output list after 100 phases for some larger inputs:
-
-80871224585914546619083218645595 becomes 24176176.
-19617804207202209144916044189917 becomes 73745418.
-69317163492948606335995924319873 becomes 52432133.
-After 100 phases of FFT, what are the first eight digits in the final output list?
-
---- Part Two ---
-
-Now that your FFT is working, you can decode the real signal.
-
-The real signal is your puzzle input repeated 10000 times. Treat this new signal as a single input list. Patterns are still calculated as before, and 100 phases of FFT are still applied.
-
-The first seven digits of your initial input signal also represent the message offset. The message offset is the location of the eight-digit message in the final output list. Specifically, the message offset indicates the number of digits to skip before reading the eight-digit message. For example, if the first seven digits of your initial input signal were 1234567, the eight-digit message would be the eight digits after skipping 1,234,567 digits of the final output list. Or, if the message offset were 7 and your final output list were 98765432109876543210, the eight-digit message would be 21098765. (Of course, your real message offset will be a seven-digit number, not a one-digit number like 7.)
-
-Here is the eight-digit message in the final output list after 100 phases. The message offset given in each input has been highlighted. (Note that the inputs given below are repeated 10000 times to find the actual starting input lists.)
-
-03036732577212944063491565474664 becomes 84462026.
-02935109699940807407585447034323 becomes 78725270.
-03081770884921959731165446850517 becomes 53553731.
-
-After repeating your input signal 10000 times and running 100 phases of FFT, what is the eight-digit message embedded in the final output list?
+What is the number of the Sue that got you the gift?
 
 */
 
@@ -96,163 +43,34 @@ namespace Day16
     {
         private Program(string inputFile, bool part1)
         {
-            var start = ReadProgram(inputFile);
+            var lines = AoC2015.Program.ReadLines(inputFile);
+            ParseInput(lines);
+
             if (part1)
             {
-                var result = RunFFTPart1(start, 100);
-                Console.WriteLine($"Day16 inputLen:{start.Length} part1:{result}");
-                var expected = "69549155";
-                if (result != expected)
+                var result1 = -666;
+                Console.WriteLine($"Day16 Result1:{result1}");
+                var expected = 21367368;
+                if (result1 != expected)
                 {
-                    throw new InvalidDataException($"Part1 is broken {result} should be {expected}");
+                    throw new InvalidProgramException($"Part1 is broken {result1} != {expected}");
                 }
             }
             else
             {
-                var result = RunFFTPart2(start, 100);
-                Console.WriteLine($"Day16 inputLen:{start.Length} part2:{result}");
+                var result2 = -123;
+                Console.WriteLine($"Day16 Result2:{result2}");
+                var expected = 1766400;
+                if (result2 != expected)
+                {
+                    throw new InvalidProgramException($"Part2 is broken {result2} != {expected}");
+                }
             }
         }
 
-        private string ReadProgram(string inputFile)
+        public static void ParseInput(string[] lines)
         {
-            var elements = File.ReadAllText(inputFile);
-            return elements;
         }
-
-        public static string RunFFTPart1(string start, int numIterations)
-        {
-            var numDigits = start.Length;
-            var startDigits = new int[numDigits];
-            var currentDigits = new int[numDigits];
-            var nextDigits = new int[numDigits];
-            for (int d = 0; d < numDigits; ++d)
-            {
-                char charDigit = start[d];
-                startDigits[d] = charDigit - '0';
-                currentDigits[d] = startDigits[d];
-                nextDigits[d] = startDigits[d];
-            }
-
-            for (int i = 0; i < numIterations; ++i)
-            {
-                for (long d = 0; d < numDigits; ++d)
-                {
-                    currentDigits[d] = nextDigits[d];
-                }
-                for (long outputDigit = 0; outputDigit < numDigits; ++outputDigit)
-                {
-                    long total = 0;
-                    long repeat = outputDigit + 1;
-                    long repeatCount = 0;
-                    long patternIndex = 1;
-                    for (long d = outputDigit; d < numDigits; ++d)
-                    {
-                        if (patternIndex == 1)
-                        {
-                            total += currentDigits[d];
-                        }
-                        else if (patternIndex == 3)
-                        {
-                            total -= currentDigits[d];
-                        }
-                        ++repeatCount;
-                        if (repeatCount >= repeat)
-                        {
-                            repeatCount = 0;
-                            ++patternIndex;
-                            if (patternIndex >= 4)
-                            {
-                                patternIndex = 0;
-                            }
-                        }
-                    }
-                    if (total >= 0)
-                    {
-                        nextDigits[outputDigit] = (int)(total % 10);
-                    }
-                    else
-                    {
-                        nextDigits[outputDigit] = (int)(-total % 10);
-                    }
-                }
-            }
-
-            var result = new char[8];
-            for (long d = 0; d < 8; ++d)
-            {
-                result[d] = (char)(nextDigits[d] + '0');
-
-            }
-            return new string(result);
-        }
-
-        public static string RunFFTPart2(string start, int numIterations)
-        {
-            //5975677
-            string start1000 = "";
-            for (int i = 0; i < 1000; ++i)
-            {
-                start1000 += start;
-            }
-            string message = "";
-            for (int i = 0; i < 10; ++i)
-            {
-                message += start1000;
-            }
-            long startIndex = long.Parse(message.Substring(0, 7));
-            long numDigits = message.Length;
-            Console.WriteLine($"Day16 inputLen:{numDigits} startPosition:{startIndex}");
-            if (startIndex < numDigits / 2)
-            {
-                throw new InvalidDataException($"Wrong input data");
-            }
-            // startIndex >= numDigits/2 : so pattern lookup is 1,1,1,1,1,1
-            // which is sumation : work backwards computing the sum (fibonacci style)
-
-            var startDigits = new int[numDigits];
-            var currentDigits = new int[numDigits];
-            var nextDigits = new int[numDigits];
-            for (int d = 0; d < numDigits; ++d)
-            {
-                char charDigit = message[d];
-                startDigits[d] = charDigit - '0';
-                currentDigits[d] = startDigits[d];
-                nextDigits[d] = startDigits[d];
-            }
-
-            for (int i = 0; i < numIterations; ++i)
-            {
-                for (long d = 0; d < numDigits; ++d)
-                {
-                    currentDigits[d] = nextDigits[d];
-                }
-                long total = 0;
-                // startIndex >= numDigits/2 : so pattern lookup is 1,1,1,1,1,1
-                // which is pure sumation : work backwards computing the sum (fibonacci style)
-                for (long d = numDigits - 1; d >= startIndex; --d)
-                {
-                    total += currentDigits[d];
-                    if (total >= 0)
-                    {
-                        nextDigits[d] = (int)(total % 10);
-                    }
-                    else
-                    {
-                        nextDigits[d] = (int)(-total % 10);
-                    }
-                }
-            }
-
-            var result = new char[8];
-            for (long d = startIndex; d < startIndex + 8; ++d)
-            {
-                result[d - startIndex] = (char)(nextDigits[d] + '0');
-
-            }
-            return new string(result);
-        }
-
 
         public static void Run()
         {
