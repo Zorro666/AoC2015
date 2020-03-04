@@ -44,9 +44,15 @@ Your puzzle answer was 103.
 
 --- Part Two ---
 
-As you're about to send the thank you note, something in the MFCSAM's instructions catches your eye. Apparently, it has an outdated retroencabulator, and so the output from the machine isn't exact values - some of them indicate ranges.
+As you're about to send the thank you note, something in the MFCSAM's instructions catches your eye. 
+Apparently, it has an outdated retroencabulator, and so the output from the machine isn't exact values - 
+some of them indicate ranges.
 
-In particular, the cats and trees readings indicates that there are greater than that many (due to the unpredictable nuclear decay of cat dander and tree pollen), while the pomeranians and goldfish readings indicate that there are fewer than that many (due to the modial interaction of magnetoreluctance).
+In particular, 
+the cats and trees readings indicates that there are greater than that many 
+(due to the unpredictable nuclear decay of cat dander and tree pollen), 
+while the pomeranians and goldfish readings indicate that there are fewer than that many 
+(due to the modial interaction of magnetoreluctance).
 
 What is the number of the real Aunt Sue?
 
@@ -62,7 +68,7 @@ namespace Day16
 
             if (part1)
             {
-                var result1 = FindSue(lines);
+                var result1 = FindSue(lines, true);
                 Console.WriteLine($"Day16 Result1:{result1}");
                 var expected = 103;
                 if (result1 != expected)
@@ -72,9 +78,9 @@ namespace Day16
             }
             else
             {
-                var result2 = -123;
+                var result2 = FindSue(lines, false);
                 Console.WriteLine($"Day16 Result2:{result2}");
-                var expected = 1766400;
+                var expected = 405;
                 if (result2 != expected)
                 {
                     throw new InvalidProgramException($"Part2 is broken {result2} != {expected}");
@@ -82,7 +88,7 @@ namespace Day16
             }
         }
 
-        public static int FindSue(string[] lines)
+        public static int FindSue(string[] lines, bool exactMatch)
         {
             Dictionary<string, int> knownFacts = new Dictionary<string, int>();
             knownFacts["children"] = 3;
@@ -109,9 +115,38 @@ namespace Day16
                 {
                     var property = tokens[t].TrimEnd(':');
                     var value = int.Parse(tokens[t + 1].TrimEnd(','));
-                    if (knownFacts[property] != value)
+                    if (exactMatch)
                     {
-                        badSue = true;
+                        if (knownFacts[property] != value)
+                        {
+                            badSue = true;
+                        }
+                    }
+                    else
+                    {
+                        // the cats and trees readings indicates that there are greater than that many 
+                        if ((property == "cats") || (property == "trees"))
+                        {
+                            if (knownFacts[property] >= value)
+                            {
+                                badSue = true;
+                            }
+                        }
+                        // the pomeranians and goldfish readings indicate that there are fewer than that many 
+                        else if ((property == "pomeranians") || (property == "goldfish"))
+                        {
+                            if (knownFacts[property] <= value)
+                            {
+                                badSue = true;
+                            }
+                        }
+                        else
+                        {
+                            if (knownFacts[property] != value)
+                            {
+                                badSue = true;
+                            }
+                        }
                     }
                 }
                 if (badSue == false)
