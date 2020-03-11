@@ -127,7 +127,7 @@ namespace Day17
                     }
                     else if (currentTotal < target)
                     {
-                        CountMatchTarget(i, target, ref usedContainers, ref currentTotal);
+                        CountMatchTarget(i + 1, target, ref usedContainers, ref currentTotal);
                     }
                     currentTotal -= sContainers[i];
                     usedContainers[i] = false;

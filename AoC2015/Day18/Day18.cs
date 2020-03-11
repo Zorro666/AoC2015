@@ -150,7 +150,7 @@ namespace Day18
                 ParseMap(lines, false);
                 Simulate(100);
                 var result1 = LightsOnCount();
-                Console.WriteLine($"Day18 Part1:{result1}");
+                Console.WriteLine($"Day18 : Result1 {result1}");
                 var expected = 814;
                 if (result1 != expected)
                 {
@@ -162,7 +162,7 @@ namespace Day18
                 ParseMap(lines, true);
                 Simulate(100);
                 var result2 = LightsOnCount();
-                Console.WriteLine($"Day18 Part2:{result2}");
+                Console.WriteLine($"Day18 : Result2 {result2}");
                 var expected = 924;
                 if (result2 != expected)
                 {

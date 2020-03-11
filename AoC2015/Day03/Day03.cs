@@ -44,7 +44,7 @@ namespace Day03
             {
                 var result1 = HowManyHousesVisited(moves, false);
                 long expected = 2565;
-                Console.WriteLine($"Day03 : Part1 {result1}");
+                Console.WriteLine($"Day03 : Result1 {result1}");
                 if (result1 != expected)
                 {
                     throw new InvalidOperationException($"Part1 is broken {result1} != {expected}");
@@ -54,11 +54,11 @@ namespace Day03
             {
                 var result2 = HowManyHousesVisited(moves, true);
                 long expected = 2639;
+                Console.WriteLine($"Day03 : Result2 {result2}");
                 if (result2 != expected)
                 {
                     throw new InvalidOperationException($"Part2 is broken {result2} != {expected}");
                 }
-                Console.WriteLine($"Day03 : Part2 {result2}");
             }
         }
 

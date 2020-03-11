@@ -72,7 +72,7 @@ namespace Day13
                 var expected = 618;
                 if (result1 != expected)
                 {
-                    throw new InvalidProgramException($"Part1 result has been broken {result1}");
+                    throw new InvalidOperationException($"Part1 is broken {result1} != {expected}");
                 }
             }
             else
@@ -91,7 +91,7 @@ namespace Day13
                 var expected = 601;
                 if (result2 != expected)
                 {
-                    throw new InvalidProgramException($"Part2 result has been broken {result2}");
+                    throw new InvalidOperationException($"Part2 is broken {result2} != {expected}");
                 }
             }
         }

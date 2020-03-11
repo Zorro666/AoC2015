@@ -138,7 +138,7 @@ namespace Day25
                 var result1 = FindDoorCombination();
                 var expected = 4362;
                 Console.WriteLine($"");
-                Console.WriteLine($"Day25: Part1 {result1}");
+                Console.WriteLine($"Day25: Result1 {result1}");
                 if (result1 != expected)
                 {
                     throw new InvalidDataException($"Part1 is broken {result1} != {expected}");
@@ -148,7 +148,7 @@ namespace Day25
             {
                 var result2 = -666;
                 var expected = -123;
-                Console.WriteLine($"Day25: Part2 {result2}");
+                Console.WriteLine($"Day25: Result2 {result2}");
                 if (result2 != expected)
                 {
                     throw new InvalidDataException($"Part2 is broken {result2} != {expected}");

@@ -48,7 +48,7 @@ namespace Day12
             {
                 ParseLines(lines, false);
                 var result1 = GetSum();
-                Console.WriteLine($"Day12 : Part1 {result1}");
+                Console.WriteLine($"Day12 : Result1 {result1}");
                 var expected = 119433;
                 if (result1 != expected)
                 {
@@ -59,7 +59,7 @@ namespace Day12
             {
                 ParseLines(lines, true);
                 var result2 = GetSum();
-                Console.WriteLine($"Day12 : Part2 {result2}");
+                Console.WriteLine($"Day12 : Result2 {result2}");
                 var expected = 68466;
                 if (result2 != expected)
                 {
