@@ -1,81 +1,64 @@
 ﻿using System;
-using System.IO;
+using System.Collections.Generic;
 
 /*
---- Day 19: Tractor Beam ---
 
-Unsure of the state of Santa's ship, you borrowed the tractor beam technology from Triton. Time to test it out.
+--- Day 19: Medicine for Rudolph ---
 
-When you're safely away from anything else, you activate the tractor beam, but nothing happens. It's hard to tell whether it's working if there's nothing to use it on. Fortunately, your ship's drone system can be configured to deploy a drone to specific coordinates and then check whether it's being pulled. There's even an Intcode program (your puzzle input) that gives you access to the drone system.
+Rudolph the Red-Nosed Reindeer is sick! His nose isn't shining very brightly, and he needs medicine.
 
-The program uses two input instructions to request the X and Y position to which the drone should be deployed. Negative numbers are invalid and will confuse the drone; all numbers should be zero or positive.
+Red-Nosed Reindeer biology isn't similar to regular reindeer biology; Rudolph is going to need custom-made medicine. Unfortunately, Red-Nosed Reindeer chemistry isn't similar to regular reindeer chemistry, either.
 
-Then, the program will output whether the drone is stationary (0) or being pulled by something (1). For example, the coordinate X=0, Y=0 is directly in front of the tractor beam emitter, so the drone control program will always report 1 at that location.
+The North Pole is equipped with a Red-Nosed Reindeer nuclear fusion/fission plant, capable of constructing any Red-Nosed Reindeer molecule you need. It works by starting with some input molecule and then doing a series of replacements, one per step, until it has the right molecule.
 
-To better understand the tractor beam, it is important to get a good picture of the beam itself. For example, suppose you scan the 10x10 grid of points closest to the emitter:
+However, the machine has to be calibrated before it can be used. Calibration involves determining the number of molecules that can be generated in one step from a given starting point.
 
-       X
-  0->      9
- 0#.........
- |.#........
- v..##......
-  ...###....
-  ....###...
-Y .....####.
-  ......####
-  ......####
-  .......###
- 9........##
-In this example, the number of points affected by the tractor beam in the 10x10 area closest to the emitter is 27.
+For example, imagine a simpler machine that supports only the following replacements:
 
-However, you'll need to scan a larger area to understand the shape of the beam. How many points are affected by the tractor beam in the 50x50 area closest to the emitter? (For each of X and Y, this will be 0 through 49.)
+H => HO
+H => OH
+O => HH
+
+Given the replacements above and starting with HOH, the following molecules could be generated:
+
+HOOH (via H => HO on the first H).
+HOHO (via H => HO on the second H).
+OHOH (via H => OH on the first H).
+HOOH (via H => OH on the second H).
+HHHH (via O => HH).
+So, in the example above, there are 4 distinct molecules (not five, because HOOH appears twice) after one replacement from HOH. 
+Santa's favorite molecule, HOHOHO, can become 7 distinct molecules (over nine replacements: six from H, and three from O).
+
+The machine replaces without regard for the surrounding characters. 
+For example, given the string H2O, the transition H => OO would result in OO2O.
+
+Your puzzle input describes all of the possible replacements and, at the bottom, the medicine molecule for which you need to calibrate the machine. 
+How many distinct molecules can be created after all the different ways you can do one replacement on the medicine molecule?
+
+Your puzzle answer was 509.
 
 --- Part Two ---
 
-You aren't sure how large Santa's ship is. You aren't even sure if you'll need to use this thing on Santa's ship, but it doesn't hurt to be prepared. You figure Santa's ship might fit in a 100x100 square.
+Now that the machine is calibrated, you're ready to begin molecule fabrication.
 
-The beam gets wider as it travels away from the emitter; you'll need to be a minimum distance away to fit a square of that size into the beam fully. (Don't rotate the square; it should be aligned to the same axes as the drone grid.)
+Molecule fabrication always begins with just a single electron, e, and applying replacements one at a time, just like the ones during calibration.
 
-For example, suppose you have the following tractor beam readings:
+For example, suppose you have the following replacements:
 
-#.......................................
-.#......................................
-..##....................................
-...###..................................
-....###.................................
-.....####...............................
-......#####.............................
-......######............................
-.......#######..........................
-........########........................
-.........#########......................
-..........#########.....................
-...........##########...................
-...........############.................
-............############................
-.............#############..............
-..............##############............
-...............###############..........
-................###############.........
-................#################.......
-.................########OOOOOOOOOO.....
-..................#######OOOOOOOOOO#....
-...................######OOOOOOOOOO###..
-....................#####OOOOOOOOOO#####
-.....................####OOOOOOOOOO#####
-.....................####OOOOOOOOOO#####
-......................###OOOOOOOOOO#####
-.......................##OOOOOOOOOO#####
-........................#OOOOOOOOOO#####
-.........................OOOOOOOOOO#####
-..........................##############
-..........................##############
-...........................#############
-............................############
-.............................###########
-In this example, the 10x10 square closest to the emitter that fits entirely within the tractor beam has been marked O. Within it, the point closest to the emitter (the only highlighted O) is at X=25, Y=20.
+e => H
+e => O
+H => HO
+H => OH
+O => HH
+If you'd like to make HOH, you start with e, and then make the following replacements:
 
-Find the 100x100 square closest to the emitter that fits entirely within the tractor beam; within that square, find the point closest to the emitter. What value do you get if you take that point's X coordinate, multiply it by 10000, then add the point's Y coordinate? (In the example above, this would be 250020.)
+e => O to get O
+O => HH to get HH
+H => OH (on the second H) to get HOH
+So, you could make HOH after 3 steps. Santa's favorite molecule, HOHOHO, can be made in 6 steps.
+
+How long will it take to make the medicine? 
+Given the available replacements and the medicine molecule in your puzzle input, what is the fewest number of steps to go from e to the medicine molecule?
 
 */
 
@@ -83,228 +66,181 @@ namespace Day19
 {
     class Program
     {
-        static IntProgram sProgram = new IntProgram();
-        static int sMapSize;
-        static int[] sLeftEdge;
-        static int[] sRightEdge;
-        static char[,] sMap;
+        struct Rule
+        {
+            public string from;
+            public string to;
+        };
+
+        static Rule[] sRules;
+        static string sSource;
+        static Dictionary<string, int> sOutputs;
+        static Random sRandom = new Random();
 
         private Program(string inputFile, bool part1)
         {
-            sProgram.LoadProgram(inputFile);
-
+            var lines = AoC2015.Program.ReadLines(inputFile);
+            ParseInput(lines);
             if (part1)
             {
-                sMapSize = 50;
-                GenerateMap();
-                //OutputMap();
-                var result = CountAffected();
-                Console.WriteLine($"Day19 : Result1 {result}");
-                if (116 != result)
+                var result1 = UniqueMolecules();
+                Console.WriteLine($"Day19 : Result1 {result1}");
+                var expected = 509;
+                if (result1 != expected)
                 {
-                    throw new InvalidDataException($"Part1 result has been broken {result} != 116");
+                    throw new InvalidProgramException($"Part1 is broken {result1} != {expected}");
                 }
             }
             else
             {
-                sMapSize = 10000;
-                var bottomEdge = FindSantaSquare();
-                var topEdge = bottomEdge - 99;
-                var leftTopEdge = sLeftEdge[topEdge];
-                var rightTopEdge = sRightEdge[topEdge];
-                var leftBottomEdge = sLeftEdge[bottomEdge];
-                var rightBottomEdge = sRightEdge[bottomEdge];
-                Console.WriteLine($"Top[{topEdge}] {leftTopEdge} -> {rightTopEdge} Bottom[{bottomEdge}] {leftBottomEdge} -> {rightBottomEdge}");
-                var x = rightTopEdge - 100;
-                var y = topEdge;
-                var result = x * 10000 + y;
-                Console.WriteLine($"Day19 : Result2 {result}");
-                if (10311666 != result)
+                var result2 = GenerateCompound();
+                Console.WriteLine($"Day19 : Result2 {result2}");
+                var expected = 195;
+                if (result2 != expected)
                 {
-                    throw new InvalidDataException($"Part2 result has been broken {result} != 10311666");
+                    throw new InvalidProgramException($"Part2 is broken {result2} != {expected}");
                 }
             }
         }
 
-        static long CountAffected()
+        public static void ParseInput(string[] lines)
         {
-            long count = 0;
-            for (int y = 0; y < sMapSize; ++y)
+            var ruleCount = lines.Length - 2;
+            sRules = new Rule[ruleCount];
+            sOutputs = new Dictionary<string, int>(1024);
+
+            for (var r = 0; r < ruleCount; ++r)
             {
-                for (int x = 0; x < sMapSize; ++x)
+                ref Rule rule = ref sRules[r];
+                var line = lines[r];
+                var tokens = line.Split(' ');
+                if (tokens.Length != 3)
                 {
-                    count += sMap[x, y] == '.' ? 0 : 1;
+                    throw new InvalidProgramException($"Invalid rule line '{line}' expected 3 tokens {tokens.Length}");
                 }
+                if (tokens[1] != "=>")
+                {
+                    throw new InvalidProgramException($"Invalid rule line '{line}' expected second token to be '=>' {tokens[1]}");
+                }
+                rule.from = tokens[0];
+                rule.to = tokens[2];
             }
-            return count;
+
+            if (lines[ruleCount].Length != 0)
+            {
+                throw new InvalidProgramException($"Invalid blank rule line '{lines[ruleCount]}' expected empty line {lines[ruleCount].Length}");
+            }
+
+            sSource = lines[ruleCount + 1];
+            if (sSource.Length == 0)
+            {
+                throw new InvalidProgramException($"Invalid source line '{sSource}' expected non-empty line");
+            }
         }
 
-        static int FindSantaSquare()
+        public static int UniqueMolecules()
         {
-            bool halt = false;
-            bool hasOutput = false;
-            InitMap();
-            var inputs = new long[2];
-            int xLeft = 0;
-            int xRight = -1;
-            for (int y = 0; y < sMapSize; ++y)
+            return CountUniqueMolecules(sSource);
+        }
+
+        static int CountUniqueMolecules(string source)
+        {
+            foreach (var rule in sRules)
             {
-                bool beamStarted = false;
-                int beamStartX = -1;
-                int beamEndX = -1;
-                for (int x = xLeft; x < sMapSize; ++x)
+                GenerateOutputsFromRule(source, rule);
+            }
+            return sOutputs.Count;
+        }
+
+        static bool GenerateOutputsFromRule(string source, Rule rule)
+        {
+            var from = rule.from;
+            var to = rule.to;
+            var match = source.IndexOf(from, 0);
+            var startCount = sOutputs.Count;
+            do
+            {
+                if (match >= 0)
                 {
-                    long result;
-                    inputs[0] = x;
-                    inputs[1] = y;
-                    sProgram.Reset();
-                    sProgram.SetInputData(inputs);
-                    result = sProgram.RunProgram(ref halt, ref hasOutput);
-                    if (result == 1)
+                    var output = source.Substring(0, match);
+                    output += to;
+                    output += source.Substring(match + from.Length);
+                    sOutputs[output] = 1;
+                    match += from.Length;
+                    match = source.IndexOf(from, match);
+                }
+            }
+            while (match >= 0);
+            return sOutputs.Count > startCount;
+        }
+
+        static bool RuleOutputMatches(Rule rule, string source)
+        {
+            var from = rule.to;
+            var match = source.IndexOf(from, 0);
+            return (match >= 0);
+        }
+
+        static string ReverseApplyRule(Rule rule, string source)
+        {
+            var from = rule.to;
+            var to = rule.from;
+            var match = source.IndexOf(from, 0);
+            var output = source.Substring(0, match);
+            output += to;
+            output += source.Substring(match + from.Length);
+            return output;
+        }
+
+        public static int GenerateCompound()
+        {
+            var target = "e";
+            var start = sSource;
+            var steps = 0;
+            var current = start;
+            var tries = 0;
+            var restarts = 0;
+            while (current != target)
+            {
+                var i = sRandom.Next(sRules.Length);
+                var rule = sRules[i];
+                ++tries;
+                if (RuleOutputMatches(rule, current))
+                {
+                    ++steps;
+                    var reduction = ReverseApplyRule(rule, current);
+                    if (reduction == target)
                     {
-                        if (!beamStarted)
-                        {
-                            sLeftEdge[y] = x;
-                            beamStartX = x;
-                            xLeft = x - 2;
-                            if (xLeft < 0)
-                            {
-                                xLeft = 0;
-                            }
-                            x = xRight;
-                            if (x < beamStartX)
-                            {
-                                x = beamStartX;
-                            }
-                        }
-                        beamStarted = true;
+                        var stepsCount = steps;
+                        //Console.WriteLine($"Found it {stepsCount}");
+                        return stepsCount;
                     }
-                    else if (beamStarted && (result == 0))
+                    if (reduction != current)
                     {
-                        sRightEdge[y] = x;
-                        beamEndX = x;
-                        for (int i = beamStartX; i < beamEndX; ++i)
-                        {
-                            sMap[i, y] = '#';
-                        }
-                        xRight = x - 1;
-                        if (xRight < 0)
-                        {
-                            xRight = 0;
-                        }
-                        break;
+                        tries = 0;
+                        current = reduction;
                     }
                 }
-                if ((beamEndX - beamStartX) >= 100)
+                if (tries >= 1000)
                 {
-                    if (y >= 100)
+                    ++restarts;
+                    if (restarts < 1000)
                     {
-                        Console.WriteLine($"[{y}] {beamStartX} -> {beamEndX}");
-                        int rightTopEdge = sRightEdge[y - 99];
-                        int leftBottomEdge = sLeftEdge[y];
-                        if ((leftBottomEdge + 99) < rightTopEdge)
-                        {
-                            return y;
-                        }
+                        //Console.WriteLine($"No matches after {tries} tries. Restarting.");
+                        tries = 0;
+                        current = sSource;
+                        steps = 0;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"No matches after {restarts} restarts. Quitting.");
+                        return -1;
                     }
                 }
             }
             return -1;
         }
 
-        static void InitMap()
-        {
-            sMap = new char[sMapSize, sMapSize];
-            sLeftEdge = new int[sMapSize];
-            sRightEdge = new int[sMapSize];
-            for (int y = 0; y < sMapSize; ++y)
-            {
-                for (int x = 0; x < sMapSize; ++x)
-                {
-                    sMap[x, y] = '.';
-                }
-            }
-        }
-
-        static void GenerateMap()
-        {
-            bool halt = false;
-            bool hasOutput = false;
-            InitMap();
-
-            var inputs = new long[2];
-            for (int y = 0; y < sMapSize; ++y)
-            {
-                for (int x = 0; x < sMapSize; ++x)
-                {
-                    sMap[x, y] = '.';
-                }
-            }
-
-            int xLeft = 0;
-            int xRight = -1;
-            int beamStartX = -1;
-            for (int y = 0; y < sMapSize; ++y)
-            {
-                bool beamStarted = false;
-                for (int x = xLeft; x < sMapSize; ++x)
-                {
-                    long result;
-                    inputs[0] = x;
-                    inputs[1] = y;
-                    sProgram.Reset();
-                    sProgram.SetInputData(inputs);
-                    result = sProgram.RunProgram(ref halt, ref hasOutput);
-                    char output = result == 1 ? '#' : '.';
-                    sMap[x, y] = output;
-                    if (result == 1)
-                    {
-                        if (!beamStarted)
-                        {
-                            beamStartX = x;
-                            xLeft = x - 2;
-                            if (xLeft < 0)
-                            {
-                                xLeft = 0;
-                            }
-                            x = xRight;
-                            if (x < beamStartX)
-                            {
-                                x = beamStartX;
-                            }
-                        }
-                        beamStarted = true;
-                    }
-                    else if (beamStarted && (result == 0))
-                    {
-                        xRight = x - 1;
-                        if (xRight < 0)
-                        {
-                            xRight = 0;
-                        }
-                        for (int i = beamStartX; i < x; ++i)
-                        {
-                            sMap[i, y] = '#';
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-
-        static void OutputMap()
-        {
-
-            for (int y = 0; y < sMapSize; ++y)
-            {
-                string line = "";
-                for (int x = 0; x < sMapSize; ++x)
-                {
-                    line += sMap[x, y];
-                }
-                Console.WriteLine(line);
-            }
-        }
         public static void Run()
         {
             Console.WriteLine("Day19 : Start");
