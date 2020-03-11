@@ -4,104 +4,53 @@ using System.IO;
 
 /*
 
---- Day 21: Springdroid Adventure ---
+    --- Day 21: RPG Simulator 20XX ---
 
-You lift off from Pluto and start flying in the direction of Santa.
+Little Henry Case got a new video game for Christmas. It's an RPG, and he's stuck on a boss. He needs to know what equipment to buy at the shop. He hands you the controller.
 
-While experimenting further with the tractor beam, you accidentally pull an asteroid directly into your ship! It deals significant damage to your hull and causes your ship to begin tumbling violently.
+In this game, the player (you) and the enemy (the boss) take turns attacking. The player always goes first. Each attack reduces the opponent's hit points by at least 1. The first character at or below 0 hit points loses.
 
-You can send a droid out to investigate, but the tumbling is causing enough artificial gravity that one wrong step could send the droid through a hole in the hull and flying out into space.
+Damage dealt by an attacker each turn is equal to the attacker's damage score minus the defender's armor score. An attacker always does at least 1 damage. So, if the attacker has a damage score of 8, and the defender has an armor score of 3, the defender loses 5 hit points. If the defender had an armor score of 300, the defender would still lose 1 hit point.
 
-The clear choice for this mission is a droid that can jump over the holes in the hull - a springdroid.
+Your damage score and armor score both start at zero. They can be increased by buying items in exchange for gold. You start with no items and have as much gold as you need. Your total damage or armor is equal to the sum of those stats from all of your items. You have 100 hit points.
 
-You can use an Intcode program (your puzzle input) running on an ASCII-capable computer to program the springdroid.However, springdroids don't run Intcode; instead, they run a simplified assembly language called springscript.
+Here is what the item shop is selling:
 
-While a springdroid is certainly capable of navigating the artificial gravity and giant holes, it has one downside: it can only remember at most 15 springscript instructions.
+Weapons:    Cost  Damage  Armor
+Dagger        8     4       0
+Shortsword   10     5       0
+Warhammer    25     6       0
+Longsword    40     7       0
+Greataxe     74     8       0
 
-The springdroid will move forward automatically, constantly thinking about whether to jump. The springscript program defines the logic for this decision.
+Armor:      Cost  Damage  Armor
+Leather      13     0       1
+Chainmail    31     0       2
+Splintmail   53     0       3
+Bandedmail   75     0       4
+Platemail   102     0       5
 
-Springscript programs only use Boolean values, not numbers or strings. Two registers are available: T, the temporary value register, and J, the jump register.If the jump register is true at the end of the springscript program, the springdroid will try to jump. Both of these registers start with the value false.
+Rings:      Cost  Damage  Armor
+Damage +1    25     1       0
+Damage +2    50     2       0
+Damage +3   100     3       0
+Defense +1   20     0       1
+Defense +2   40     0       2
+Defense +3   80     0       3
+You must buy exactly one weapon; no dual-wielding. Armor is optional, but you can't use more than one. You can buy 0-2 rings (at most one for each hand). You must use any items you buy. The shop only has one of each item, so you can't buy, for example, two rings of Damage +3.
 
-Springdroids have a sensor that can detect whether there is ground at various distances in the direction it is facing; these values are provided in read-only registers.Your springdroid can detect ground at four distances: one tile away (A), two tiles away (B), three tiles away (C), and four tiles away (D). If there is ground at the given distance, the register will be true; if there is a hole, the register will be false.
+For example, suppose you have 8 hit points, 5 damage, and 5 armor, and that the boss has 12 hit points, 7 damage, and 2 armor:
 
-There are only three instructions available in springscript:
+The player deals 5-2 = 3 damage; the boss goes down to 9 hit points.
+The boss deals 7-5 = 2 damage; the player goes down to 6 hit points.
+The player deals 5-2 = 3 damage; the boss goes down to 6 hit points.
+The boss deals 7-5 = 2 damage; the player goes down to 4 hit points.
+The player deals 5-2 = 3 damage; the boss goes down to 3 hit points.
+The boss deals 7-5 = 2 damage; the player goes down to 2 hit points.
+The player deals 5-2 = 3 damage; the boss goes down to 0 hit points.
+In this scenario, the player wins! (Barely.)
 
-AND X Y sets Y to true if both X and Y are true; otherwise, it sets Y to false.
-OR X Y sets Y to true if at least one of X or Y is true; otherwise, it sets Y to false.
-NOT X Y sets Y to true if X is false; otherwise, it sets Y to false.
-In all three instructions, the second argument(Y) needs to be a writable register(either T or J). The first argument(X) can be any register(including A, B, C, or D).
-
-For example, the one-instruction program NOT A J means "if the tile immediately in front of me is not ground, jump".
-
-Or, here is a program that jumps if a three-tile-wide hole(with ground on the other side of the hole) is detected:
-
-NOT A J
-NOT B T
-AND T J
-NOT C T
-AND T J
-AND D J
-The Intcode program expects ASCII inputs and outputs.It will begin by displaying a prompt; then, input the desired instructions one per line.End each line with a newline(ASCII code 10). When you have finished entering your program, provide the command WALK followed by a newline to instruct the springdroid to begin surveying the hull.
-
-If the springdroid falls into space, an ASCII rendering of the last moments of its life will be produced.In these, @ is the springdroid, # is hull, and . is empty space. For example, suppose you program the springdroid like this:
-
-NOT D J
-WALK
-This one-instruction program sets J to true if and only if there is no ground four tiles away.In other words, it attempts to jump into any hole it finds:
-
-.................
-.................
-@................
-#####.###########
-
-.................
-.................
-.@...............
-#####.###########
-
-.................
-..@..............
-.................
-#####.###########
-
-...@.............
-.................
-.................
-#####.###########
-
-.................
-....@............
-.................
-#####.###########
-
-.................
-.................
-.....@...........
-#####.###########
-
-.................
-.................
-.................
-#####@###########
-
-However, if the springdroid successfully makes it across, it will use an output instruction to indicate the amount of damage to the hull as a single giant integer outside the normal ASCII range.
-
-Program the springdroid with logic that allows it to survey the hull without falling into space. What amount of hull damage does it report?
-
---- Part Two ---
-
-There are many areas the springdroid can't reach. You flip through the manual and discover a way to increase its sensor range.
-
-Instead of ending your springcode program with WALK, use RUN. Doing this will enable extended sensor mode, capable of sensing ground up to nine tiles away. This data is available in five new read-only registers:
-
-Register E indicates whether there is ground five tiles away.
-Register F indicates whether there is ground six tiles away.
-Register G indicates whether there is ground seven tiles away.
-Register H indicates whether there is ground eight tiles away.
-Register I indicates whether there is ground nine tiles away.
-All other functions remain the same.
-
-Successfully survey the rest of the hull by ending your program with RUN. What amount of hull damage does the springdroid now report?
+You have 100 hit points. The boss's actual stats are in your puzzle input. What is the least amount of gold you can spend and still win the fight?
 
 */
 
@@ -109,144 +58,30 @@ namespace Day21
 {
     class Program
     {
-        static IntProgram sProgram = new IntProgram();
-        static List<long> sIntProgramInputsList;
-        static long[] sIntProgramInputsArray;
-        static string[] sSpringScriptProgram;
-
         private Program(string inputFile, bool part1)
         {
-            sProgram.LoadProgram(inputFile);
+            var lines = AoC2015.Program.ReadLines(inputFile);
 
             if (part1)
             {
-                sSpringScriptProgram = new string[] {
-
-// Must not get to these states
-//@.##. -> FALL OFF : ?.## : JUMP : YES
-//@..#. -> FALL OFF : ?..# : JUMP : YES
-//@.#.. -> FALL OFF : ?.#. : FALL OFF -> ??.# : JUMP : YES
-
-// What we want it to do
-//                A B C D
-//@...# -> JUMP : 0 0 0 1
-//@..## -> JUMP : 0 0 1 1
-//@.#.# -> JUMP : 0 1 0 1
-//@.### -> JUMP : 0 1 1 1 
-
-//@#..# -> JUMP : 1 0 0 1
-//@#.## -> JUMP : 1 0 1 1
-
-//@##.# -> JUMP : 1 1 0 1
-
-//@#### -> WALK : 1 1 1 1
-//@???. -> WALK : ? ? ? 0
-
-"NOT A T",
-"NOT T T",
-"AND B T",
-"AND C T",
-"NOT T J",
-"AND D J"
-                        };
-                SetSpringScriptProgram(true);
-                var result = RunSpringScript();
-                Console.WriteLine($"Day21: Result1 {result}");
-                if (result != 19354818)
+                var result1 = -666;
+                Console.WriteLine($"Day21 : Result1 {result1}");
+                var expected = 776160;
+                if (result1 != expected)
                 {
-                    throw new InvalidDataException($"Part1 is broken {result} != 19354818");
+                    throw new InvalidProgramException($"Part1 is broken {result1} != {expected}");
                 }
             }
             else
             {
-                // States to avoid
-                sSpringScriptProgram = new string[] {
-// ABCDEFGHI
-//@.???????? : JUMP : !A
-//@?.?#.???? : JUMP : !B & !E = !(B | E)
-//@??.##???? : JUMP : !C & D & E
-//@??.#???#? : JUMP : !C & D & H
-
-// J = !C & D & (H | E)
-"NOT C J",
-"AND D J",
-"NOT E T",
-"NOT T T",
-"OR H T",
-"AND T J",
-
-// T = !(B | E)
-"NOT B T",
-"NOT T T",
-"OR E T",
-"NOT T T",
-// J = (!C & D & (H | E)) | (!B & !E)
-"OR T J",
-
-// J = (!C & D & (H | E)) | (!B & !E) | !A
-"NOT A T",
-"OR T J"
-                        };
-                SetSpringScriptProgram(false);
-                var result = RunSpringScript();
-                Console.WriteLine($"Day21: Result2 {result}");
-                if (result != 1143787220)
+                var result2 = -123;
+                Console.WriteLine($"Day21 : Result2 {result2}");
+                var expected = 786240;
+                if (result2 != expected)
                 {
-                    throw new InvalidDataException($"Part1 is broken {result} != 1143787220");
+                    throw new InvalidProgramException($"Part2 is broken {result2} != {expected}");
                 }
             }
-        }
-
-
-        static private long RunSpringScript()
-        {
-            bool halt = false;
-
-            long output = -123;
-            while (!halt)
-            {
-                halt = false;
-                bool hasOutput = false;
-                long result = sProgram.RunProgram(ref halt, ref hasOutput);
-                if ((result >= 10) && (result < 255))
-                {
-                    char c = (char)result;
-                    Console.Write(c);
-                }
-                if (hasOutput)
-                {
-                    output = result;
-                }
-            }
-            return output;
-        }
-
-        private static void SetSpringScriptProgram(bool walk)
-        {
-            sIntProgramInputsList = new List<long>(1024);
-            foreach (var instruction in sSpringScriptProgram)
-            {
-                AddSpringScriptInstruction(instruction);
-            }
-            if (walk)
-            {
-                AddSpringScriptInstruction("WALK");
-            }
-            else
-            {
-                AddSpringScriptInstruction("RUN");
-            }
-            sIntProgramInputsArray = sIntProgramInputsList.ToArray();
-            sProgram.SetInputData(sIntProgramInputsArray);
-        }
-
-        private static void AddSpringScriptInstruction(string instruction)
-        {
-            foreach (var c in instruction)
-            {
-                sIntProgramInputsList.Add(c);
-            }
-            sIntProgramInputsList.Add(10);
         }
 
         public static void Run()
