@@ -1,164 +1,142 @@
 ﻿using System;
-using System.IO;
-using System.Numerics;
 
 /*
 
---- Day 22: Slam Shuffle ---
+--- Day 22: Wizard Simulator 20XX ---
 
-There isn't much to do while you wait for the droids to repair your ship. At least you're drifting in the right direction.You decide to practice a new card shuffle you've been working on.
+Little Henry Case decides that defeating bosses with swords and stuff is boring. 
+Now he's playing the game with a wizard. 
+Of course, he gets stuck on another boss and needs your help again.
 
-Digging through the ship's storage, you find a deck of space cards! Just like any deck of space cards, there are 10007 cards in the deck numbered 0 through 10006. The deck must be new - they're still in factory order, with 0 on the top, then 1, then 2, and so on, all the way through to 10006 on the bottom.
+In this version, combat still proceeds with the player and the boss taking alternating turns. 
+The player still goes first. 
+Now, however, you don't get any equipment; instead, you must choose one of your spells to cast. 
+The first character at or below 0 hit points loses.
 
-You've been practicing three different techniques that you use while shuffling. Suppose you have a deck of only 10 cards (numbered 0 through 9):
+Since you're a wizard, you don't get to wear armor, and you can't attack normally. 
+However, since you do magic damage, your opponent's armor is ignored, and so the boss effectively has zero armor as well. 
+As before, if armor (from a spell, in this case) would reduce damage below 1, it becomes 1 instead - that is, the boss' attacks always deal at least 1 damage.
 
-To deal into new stack, create a new stack of cards by dealing the top card of the deck onto the top of the new stack repeatedly until you run out of cards:
+On each of your turns, you must select one of your spells to cast. 
+If you cannot afford to cast any spell, you lose. Spells cost mana; you start with 500 mana, but have no maximum limit. 
+You must have enough mana to cast a spell, and its cost is immediately deducted when you cast it. 
+Your spells are Magic Missile, Drain, Shield, Poison, and Recharge.
 
-Top Bottom
-0 1 2 3 4 5 6 7 8 9   Your deck
-                      New stack
+Magic Missile costs 53 mana. It instantly does 4 damage.
+Drain costs 73 mana. It instantly does 2 damage and heals you for 2 hit points.
+Shield costs 113 mana. It starts an effect that lasts for 6 turns. While it is active, your armor is increased by 7.
+Poison costs 173 mana. It starts an effect that lasts for 6 turns. At the start of each turn while it is active, it deals the boss 3 damage.
+Recharge costs 229 mana. It starts an effect that lasts for 5 turns. At the start of each turn while it is active, it gives you 101 new mana.
+Effects all work the same way. 
+Effects apply at the start of both the player's turns and the boss' turns. 
+Effects are created with a timer (the number of turns they last); at the start of each turn, after they apply any effect they have, their timer is decreased by one. 
+If this decreases the timer to zero, the effect ends. 
+You cannot cast a spell that would start an effect which is already active. 
+However, effects can be started on the same turn they end.
 
-  1 2 3 4 5 6 7 8 9   Your deck
-                  0   New stack
+For example, suppose the player has 10 hit points and 250 mana, and that the boss has 13 hit points and 8 damage:
 
-    2 3 4 5 6 7 8 9   Your deck
-                1 0   New stack
+-- Player turn --
+- Player has 10 hit points, 0 armor, 250 mana
+- Boss has 13 hit points
+Player casts Poison.
 
-      3 4 5 6 7 8 9   Your deck
-              2 1 0   New stack
+-- Boss turn --
+- Player has 10 hit points, 0 armor, 77 mana
+- Boss has 13 hit points
+Poison deals 3 damage; its timer is now 5.
+Boss attacks for 8 damage.
 
-Several steps later...
+-- Player turn --
+- Player has 2 hit points, 0 armor, 77 mana
+- Boss has 10 hit points
+Poison deals 3 damage; its timer is now 4.
+Player casts Magic Missile, dealing 4 damage.
 
-                  9   Your deck
-  8 7 6 5 4 3 2 1 0   New stack
+-- Boss turn --
+- Player has 2 hit points, 0 armor, 24 mana
+- Boss has 3 hit points
+Poison deals 3 damage. This kills the boss, and the player wins.
+Now, suppose the same initial conditions, except that the boss has 14 hit points instead:
 
-                      Your deck
-9 8 7 6 5 4 3 2 1 0   New stack
-Finally, pick up the new stack you've just created and use it as the deck for the next technique.
+-- Player turn --
+- Player has 10 hit points, 0 armor, 250 mana
+- Boss has 14 hit points
+Player casts Recharge.
 
-To cut N cards, take the top N cards off the top of the deck and move them as a single unit to the bottom of the deck, retaining their order.For example, to cut 3:
+-- Boss turn --
+- Player has 10 hit points, 0 armor, 21 mana
+- Boss has 14 hit points
+Recharge provides 101 mana; its timer is now 4.
+Boss attacks for 8 damage!
 
-Top Bottom
-0 1 2 3 4 5 6 7 8 9   Your deck
+-- Player turn --
+- Player has 2 hit points, 0 armor, 122 mana
+- Boss has 14 hit points
+Recharge provides 101 mana; its timer is now 3.
+Player casts Shield, increasing armor by 7.
 
-      3 4 5 6 7 8 9   Your deck
-0 1 2                 Cut cards
+-- Boss turn --
+- Player has 2 hit points, 7 armor, 110 mana
+- Boss has 14 hit points
+Shield's timer is now 5.
+Recharge provides 101 mana; its timer is now 2.
+Boss attacks for 8 - 7 = 1 damage!
 
-3 4 5 6 7 8 9         Your deck
-              0 1 2   Cut cards
+-- Player turn --
+- Player has 1 hit point, 7 armor, 211 mana
+- Boss has 14 hit points
+Shield's timer is now 4.
+Recharge provides 101 mana; its timer is now 1.
+Player casts Drain, dealing 2 damage, and healing 2 hit points.
 
-3 4 5 6 7 8 9 0 1 2   Your deck
-You've also been getting pretty good at a version of this technique where N is negative! In that case, cut (the absolute value of) N cards from the bottom of the deck onto the top. For example, to cut -4:
+-- Boss turn --
+- Player has 3 hit points, 7 armor, 239 mana
+- Boss has 12 hit points
+Shield's timer is now 3.
+Recharge provides 101 mana; its timer is now 0.
+Recharge wears off.
+Boss attacks for 8 - 7 = 1 damage!
 
-Top Bottom
-0 1 2 3 4 5 6 7 8 9   Your deck
+-- Player turn --
+- Player has 2 hit points, 7 armor, 340 mana
+- Boss has 12 hit points
+Shield's timer is now 2.
+Player casts Poison.
 
-0 1 2 3 4 5           Your deck
-            6 7 8 9   Cut cards
+-- Boss turn --
+- Player has 2 hit points, 7 armor, 167 mana
+- Boss has 12 hit points
+Shield's timer is now 1.
+Poison deals 3 damage; its timer is now 5.
+Boss attacks for 8 - 7 = 1 damage!
 
-        0 1 2 3 4 5   Your deck
-6 7 8 9               Cut cards
+-- Player turn --
+- Player has 1 hit point, 7 armor, 167 mana
+- Boss has 9 hit points
+Shield's timer is now 0.
+Shield wears off, decreasing armor by 7.
+Poison deals 3 damage; its timer is now 4.
+Player casts Magic Missile, dealing 4 damage.
 
-6 7 8 9 0 1 2 3 4 5   Your deck
-To deal with increment N, start by clearing enough space on your table to lay out all of the cards individually in a long line.Deal the top card into the leftmost position.Then, move N positions to the right and deal the next card there. If you would move into a position past the end of the space on your table, wrap around and keep counting from the leftmost card again. Continue this process until you run out of cards.
+-- Boss turn --
+- Player has 1 hit point, 0 armor, 114 mana
+- Boss has 2 hit points
+Poison deals 3 damage. This kills the boss, and the player wins.
 
-For example, to deal with increment 3:
+You start with 50 hit points and 500 mana points. 
+The boss's actual stats are in your puzzle input. 
 
-
-0 1 2 3 4 5 6 7 8 9   Your deck
-. . . . . . . . . .   Space on table
-^                     Current position
-
-Deal the top card to the current position:
-
-  1 2 3 4 5 6 7 8 9   Your deck
-0 . . . . . . . . .   Space on table
-^                     Current position
-
-Move the current position right 3:
-
-  1 2 3 4 5 6 7 8 9   Your deck
-0 . . . . . . . . .   Space on table
-      ^               Current position
-
-Deal the top card:
-
-    2 3 4 5 6 7 8 9   Your deck
-0 . . 1 . . . . . .   Space on table
-      ^               Current position
-
-Move right 3 and deal:
-
-      3 4 5 6 7 8 9   Your deck
-0 . . 1 . . 2 . . .   Space on table
-            ^         Current position
-
-Move right 3 and deal:
-
-        4 5 6 7 8 9   Your deck
-0 . . 1 . . 2 . . 3   Space on table
-                  ^   Current position
-
-Move right 3, wrapping around, and deal:
-
-          5 6 7 8 9   Your deck
-0 . 4 1 . . 2 . . 3   Space on table
-    ^                 Current position
-
-And so on:
-
-0 7 4 1 8 5 2 9 6 3   Space on table
-Positions on the table which already contain cards are still counted; they're not skipped. Of course, this technique is carefully designed so it will never put two cards in the same position or leave a position empty.
-
-Finally, collect the cards on the table so that the leftmost card ends up at the top of your deck, the card to its right ends up just below the top card, and so on, until the rightmost card ends up at the bottom of the deck.
-
-The complete shuffle process(your puzzle input) consists of applying many of these techniques.Here are some examples that combine techniques; they all start with a factory order deck of 10 cards:
-
-deal with increment 7
-deal into new stack
-deal into new stack
-Result: 0 3 6 9 2 5 8 1 4 7
-cut 6
-deal with increment 7
-deal into new stack
-Result: 3 0 7 4 1 8 5 2 9 6
-deal with increment 7
-deal with increment 9
-cut -2
-Result: 6 3 0 7 4 1 8 5 2 9
-deal into new stack
-cut -2
-deal with increment 7
-cut 8
-cut -4
-deal with increment 7
-cut 3
-deal with increment 9
-deal with increment 3
-cut -1
-Result: 9 2 5 8 1 4 7 0 3 6
-Positions within the deck count from 0 at the top, then 1 for the card immediately below the top card, and so on to the bottom. (That is, cards start in the position matching their number.)
-
-After shuffling your factory order deck of 10007 cards, what is the position of card 2019?
-
-    
-Your puzzle answer was 6638.
-
-The first half of this puzzle is complete! It provides one gold star: *
+What is the least amount of mana you can spend and still win the fight? (Do not include mana recharge effects as "spending" negative mana.)
 
 --- Part Two ---
 
-After a while, you realize your shuffling skill won't improve much more with merely a single deck of cards. You ask every 3D printer on the ship to make you some more cards while you check on the ship repairs. While reviewing the work the droids have finished so far, you think you see Halley's Comet fly past!
+On the next run through the game, you increase the difficulty to hard.
 
-When you get back, you discover that the 3D printers have combined their power to create for you a single, giant, brand new, factory order deck of 119315717514047 space cards.
+At the start of each player turn (before any other effects apply), you lose 1 hit point. 
+If this brings you to or below 0 hit points, you lose.
 
-Finally, a deck of cards worthy of shuffling!
-
-You decide to apply your complete shuffle process (your puzzle input) to the deck 101741582076661 times in a row.
-
-You'll need to be careful, though - one wrong move with this many cards and you might overflow your entire ship!
-
-After shuffling your new, giant, factory order deck that many times, what number is on the card that ends up in position 2020?
+With the same starting stats for you and the boss, what is the least amount of mana you can spend and still win the fight?
 
 */
 
@@ -166,334 +144,415 @@ namespace Day22
 {
     class Program
     {
-        static BigInteger sDeckSize;
-        static int[] sDeck;
-        static int[] sWorkingDeck;
+        static readonly int sSpellCount = 5;
+        static readonly string[] sSpells = { "Magic Missile", "Drain", "Shield", "Poison", "Recharge" };
+        static int sInitialPlayerHP;
+        static int sInitialPlayerMana;
+        static int sInitialBossAttack;
+        static int sInitialBossHP;
+
+        static int sPlayerHP;
+        static int sPlayerArmour;
+        static int sPlayerMana;
+        static int sBossAttack;
+        static int sBossHP;
+        static int sPlayerDamagePerTurn;
+
+        static int sShieldTimer;
+        static int sPoisonTimer;
+        static int sRechargeTimer;
 
         private Program(string inputFile, bool part1)
         {
-            var instructions = ReadProgram(inputFile);
+            var lines = AoC2015.Program.ReadLines(inputFile);
+            ParseInput(lines);
 
             if (part1)
             {
-                CreateDeck(10007);
-                RunInstructions(instructions);
-                var result = FindCard(2019);
-                var expected = 6638;
-                Console.WriteLine($"Day22: Result1 {result}");
-                if (result != expected)
+                var result1 = LeastManaToWin(0);
+                var expected = 1824;
+                Console.WriteLine($"Day22: Result1 {result1}");
+                if (result1 != expected)
                 {
-                    throw new InvalidDataException($"Part1 is broken {result} != {expected}");
-                }
-
-                CreateDeck(10007);
-                ApplyInstructionsUsingEquation(instructions);
-                var result2 = FindCard(2019);
-                Console.WriteLine($"Day22: Result1 Equation {result2}");
-                if (result != result2)
-                {
-                    throw new InvalidDataException($"Equation mode not working {result2} != {result}");
+                    throw new InvalidProgramException($"Part1 is broken {result1} != {expected}");
                 }
             }
             else
             {
-                // y1 = A * x + B
-                // y2 = A * y1 + B
-                // y2 = A * A * X + A * B + B
-                // y3 = A * A * A * X + A * A * B + A * B + B
-                // YN = A^N * X + B * (SUM(A^n : 0 -> N-1)
-                // 1 + A + A*A + A*A*A + A*A*A*A
-                // SUM(A^n : 0 -> N) = S
-                // S = 1 + A * (1 + A + A * A + ... A^N-1) = 1 + A * (S - A^N)
-                // S = 1 + A * (S - A^N)
-                // S = 1 + A * S - A * A^N
-                // S * (1-A) = 1 - A^(N+1)
-                // S  = 1 - A^(N+1) / (1-A)
-                // SUM(A^n : 0 -> N-1) = (1-A^N)/(1-A)
-                // allA = A^N % DECKSIZE
-                // allB = (1 - A^N % DECKSIZE) / (1-A)
-                // allB = B * (1 - modpow(A, N, DECKSIZE)) * modpow(1-A, -1, DECKSIZE)
-
-                // Decksize = 119315717514047
-                // Apply shuffling operation : 101741582076661 times
-                // N & sDeckSize are both prime
-                BigInteger N = 101741582076661;
-                sDeckSize = 119315717514047;
-                (BigInteger repeatedA, BigInteger repeatedB) = SolveForN(instructions, N);
-                BigInteger result = (repeatedA * 2020 + repeatedB);
-                result = ModuloDeckSize(result);
-                Console.WriteLine($"Day22: Result2 {result}");
-                var expected = 77863024474406;
-                if (result != expected)
+                var result2 = LeastManaToWin(1);
+                Console.WriteLine($"Day22: Result2 {result2}");
+                var expected = 1937;
+                if (result2 != expected)
                 {
-                    throw new InvalidDataException($"Part2 is broken {result} != {expected}");
+                    throw new InvalidProgramException($"Part2 is broken {result2} != {expected}");
                 }
             }
         }
 
-        public static (BigInteger, BigInteger) SolveForN(string[] instructions, BigInteger N)
+        static void ParseInput(string[] lines)
         {
-            (BigInteger A, BigInteger B) = ConvertInstructionsToEquationLargeDeck(instructions);
-            Console.WriteLine($"A: {A}");
-            Console.WriteLine($"B: {B}");
-            BigInteger repeatedA;
-            BigInteger repeatedB;
-            if (A != 1)
+            var initialBossHP = 0;
+            var initialBossAttack = 0;
+            foreach (var line in lines)
             {
-                repeatedA = BigInteger.ModPow(A, N, sDeckSize);
-                repeatedB = B * (repeatedA + sDeckSize - 1);
-                Console.WriteLine($"allB1: {repeatedB}");
-                Console.WriteLine($"1/(A-1): {ModInverse(A - 1)}");
-                repeatedB *= ModInverse(A - 1);
-            }
-            else
-            {
-                repeatedA = 1;
-                repeatedB = B * N;
-            }
-            repeatedA = ModuloDeckSize(repeatedA);
-            repeatedB = ModuloDeckSize(repeatedB);
-            Console.WriteLine($"allA: {repeatedA}");
-            Console.WriteLine($"allB: {repeatedB}");
-            return (repeatedA, repeatedB);
-        }
-
-        private static BigInteger ModuloDeckSize(BigInteger x)
-        {
-            BigInteger result = x;
-            result %= sDeckSize;
-            while (result < 0)
-            {
-                result += sDeckSize;
-            }
-            result %= sDeckSize;
-            return result;
-        }
-
-        private static BigInteger ModInverse(BigInteger a)
-        {
-            return BigInteger.ModPow(a, sDeckSize - 2, sDeckSize);
-        }
-
-        private string[] ReadProgram(string inputFile)
-        {
-            var instructions = File.ReadAllLines(inputFile);
-            return instructions;
-        }
-
-        private static int FindCard(int cardValue)
-        {
-            int cardIndex = -123;
-            for (int i = 0; i < sDeckSize; ++i)
-            {
-                if (sDeck[i] == cardValue)
+                var tokens = line.Split(':');
+                if (tokens.Length != 2)
                 {
-                    cardIndex = i;
+                    throw new InvalidProgramException($"Unexpected number of tokens {tokens.Length} expected 2 line '{line}'");
+
                 }
-            }
-            return cardIndex;
-        }
-
-        public static void CreateDeck(int count)
-        {
-            sDeckSize = count;
-            sDeck = new int[(int)sDeckSize];
-            sWorkingDeck = new int[(int)sDeckSize];
-            for (var i = 0; i < sDeckSize; ++i)
-            {
-                sDeck[i] = i;
-            }
-        }
-
-        public static (BigInteger A, BigInteger B) ConvertInstructionsToEquationLargeDeck(string[] instructions)
-        {
-            BigInteger A = 1;
-            BigInteger B = 0;
-            if (instructions == null)
-            {
-                return (A, B);
-            }
-
-            // Do the instructions in reverse
-            var instructionCount = instructions.Length;
-            for (int i = 0; i < instructionCount; ++i)
-            {
-                var instruction = instructions[instructionCount - 1 - i];
-                // "deal with increment XXX",
-                if (instruction.StartsWith("deal with increment "))
+                var field = tokens[0];
+                var value = int.Parse(tokens[1]);
+                if (field == "Hit Points")
                 {
-                    string amount = instruction.Split("deal with increment ")[1];
-                    int incrementAmount = int.Parse(amount);
-                    BigInteger inverse = ModInverse(incrementAmount);
-                    A *= inverse;
-                    B *= inverse;
+                    initialBossHP = value;
                 }
-                // "deal into new stack"
-                else if (instruction.StartsWith("deal into new stack"))
+                else if (field == "Damage")
                 {
-                    A *= -1;
-                    B = -(B + 1);
-                }
-                // "cut XXX"
-                else if (instruction.StartsWith("cut "))
-                {
-                    string amount = instruction.Split("cut ")[1];
-                    BigInteger cutAmount = int.Parse(amount);
-                    B += cutAmount;
+                    initialBossAttack = value;
                 }
                 else
                 {
-                    throw new ArgumentException($"Unknown instruction {instruction}", nameof(instruction));
+                    throw new InvalidProgramException($"Unexpected field {field} line '{line}'");
                 }
             }
-            A = ModuloDeckSize(A);
-            B = ModuloDeckSize(B);
-            return (A, B);
-        }
-
-        public static (BigInteger A, BigInteger B) ConvertInstructionsToEquationSmallDeck(string[] instructions)
-        {
-            BigInteger A = 1;
-            BigInteger B = 0;
-            if (instructions == null)
+            if (initialBossHP == 0)
             {
-                return (A, B);
+                throw new InvalidProgramException($"Failed to find initial boss HP");
             }
-
-            foreach (var instruction in instructions)
+            if (initialBossAttack == 0)
             {
-                // "deal with increment XXX",
-                if (instruction.StartsWith("deal with increment "))
-                {
-                    string amount = instruction.Split("deal with increment ")[1];
-                    int incrementAmount = int.Parse(amount);
-                    // A = a2 * A
-                    // B = a2 * B + b2
-                    A *= incrementAmount;
-                    B *= incrementAmount;
-                }
-                // "deal into new stack"
-                else if (instruction.StartsWith("deal into new stack"))
-                {
-                    A *= -1;
-                    B = -(B + 1);
-                }
-                // "cut XXX"
-                else if (instruction.StartsWith("cut "))
-                {
-                    string amount = instruction.Split("cut ")[1];
-                    BigInteger cutAmount = int.Parse(amount);
-                    B -= cutAmount;
-                }
-                else
-                {
-                    throw new ArgumentException($"Unknown instruction {instruction}", nameof(instruction));
-                }
+                throw new InvalidProgramException($"Failed to find initial boss Attack");
             }
-            A = ModuloDeckSize(A);
-            B = ModuloDeckSize(B);
-            return (A, B);
+            InitGame(50, 500, initialBossAttack, initialBossHP);
         }
 
-        public static void ApplyInstructionsUsingEquation(string[] instructions)
+        public static void InitGame(int initialPlayerHP, int initialPlayerMana, int bossAttack, int initialBossHP)
         {
-            (BigInteger A, BigInteger B) = ConvertInstructionsToEquationSmallDeck(instructions);
-            CopyDeckIntoWorkingDeck();
-            ApplyEquation(A, B);
+            sInitialPlayerHP = initialPlayerHP;
+            sInitialPlayerMana = initialPlayerMana;
+            sInitialBossAttack = bossAttack;
+            sInitialBossHP = initialBossHP;
+            sPlayerDamagePerTurn = 0;
+            StartGame();
         }
 
-        public static void ApplyInstructionsUsingN(string[] instructions, int N)
+        static void StartGame()
         {
-            (BigInteger A, BigInteger B) = SolveForN(instructions, N);
-            CopyDeckIntoWorkingDeck();
-            ApplyEquation(A, B);
+            sPlayerHP = sInitialPlayerHP;
+            sPlayerArmour = 0;
+            sPlayerMana = sInitialPlayerMana;
+            sBossAttack = sInitialBossAttack;
+            sBossHP = sInitialBossHP;
+
+            sShieldTimer = 0;
+            sPoisonTimer = 0;
+            sRechargeTimer = 0;
         }
 
-        public static void RunInstructions(string[] instructions)
+        static void PlayerTurn(string playerSpell)
         {
-            if (instructions == null)
+            if (playerSpell == "Magic Missile")
+            {
+                if (sPlayerMana < 53)
+                {
+                    throw new InvalidProgramException($"Not enough mana to cast spell {playerSpell} Mana:{sPlayerMana}");
+                }
+                sPlayerMana -= 53;
+                sBossHP -= 4;
+            }
+            else if (playerSpell == "Drain")
+            {
+                if (sPlayerMana < 73)
+                {
+                    throw new InvalidProgramException($"Not enough mana to cast spell {playerSpell} Mana:{sPlayerMana}");
+                }
+                sPlayerMana -= 73;
+                sBossHP -= 2;
+                sPlayerHP += 2;
+            }
+            else if (playerSpell == "Shield")
+            {
+                if (sPlayerMana < 113)
+                {
+                    throw new InvalidProgramException($"Not enough mana to cast spell {playerSpell} Mana:{sPlayerMana}");
+                }
+                sPlayerMana -= 113;
+                if (sShieldTimer != 0)
+                {
+                    throw new InvalidProgramException($"Shield timer is not 0 {sShieldTimer}");
+                }
+                sShieldTimer = 6;
+            }
+            else if (playerSpell == "Poison")
+            {
+                if (sPlayerMana < 173)
+                {
+                    throw new InvalidProgramException($"Not enough mana to cast spell {playerSpell} Mana:{sPlayerMana}");
+                }
+                sPlayerMana -= 173;
+                if (sPoisonTimer != 0)
+                {
+                    throw new InvalidProgramException($"Poison timer is not 0 {sPoisonTimer}");
+                }
+                sPoisonTimer = 6;
+            }
+            else if (playerSpell == "Recharge")
+            {
+                if (sPlayerMana < 229)
+                {
+                    throw new InvalidProgramException($"Not enough mana to cast spell {playerSpell} Mana:{sPlayerMana}");
+                }
+                sPlayerMana -= 229;
+                if (sRechargeTimer != 0)
+                {
+                    throw new InvalidProgramException($"Recharge timer is not 0 {sRechargeTimer}");
+                }
+                sRechargeTimer = 5;
+            }
+            //Console.WriteLine($"Player casts '{playerSpell}' Mana:{sPlayerMana}");
+        }
+
+        static void BossTurn()
+        {
+            if (sBossHP > 0)
+            {
+                var bossDamage = sBossAttack - sPlayerArmour;
+                bossDamage = Math.Max(1, bossDamage);
+                sPlayerHP -= bossDamage;
+            }
+        }
+
+        static void ApplyEffects()
+        {
+            sPlayerArmour = 0;
+            if (sShieldTimer > 0)
+            {
+                sPlayerArmour = 7;
+                --sShieldTimer;
+            }
+            if (sPoisonTimer > 0)
+            {
+                sBossHP -= 3;
+                --sPoisonTimer;
+            }
+            if (sRechargeTimer > 0)
+            {
+                sPlayerMana += 101;
+                --sRechargeTimer;
+            }
+        }
+
+        public static void RunTurn(string playerSpell)
+        {
+            ApplyEffects();
+            sPlayerHP -= sPlayerDamagePerTurn;
+            if (sPlayerHP == 0)
             {
                 return;
             }
-            foreach (var instruction in instructions)
+            PlayerTurn(playerSpell);
+            sBossHP = Math.Max(0, sBossHP);
+            if (sBossHP == 0)
             {
-                CopyDeckIntoWorkingDeck();
-                (BigInteger A, BigInteger B) = ApplyInstruction(instruction);
-                ApplyEquation(A, B);
+                return;
+            }
+
+            ApplyEffects();
+            BossTurn();
+            sBossHP = Math.Max(0, sBossHP);
+            sPlayerHP = Math.Max(0, sPlayerHP);
+            if (sPlayerHP == 0)
+            {
+                return;
+            }
+            if (sBossHP == 0)
+            {
+                return;
             }
         }
 
-        private static (BigInteger A, BigInteger B) ApplyInstruction(string instruction)
+        public static int GetPlayerHP()
         {
-            BigInteger A;
-            BigInteger B;
-            // "deal with increment XXX",
-            if (instruction.StartsWith("deal with increment "))
+            return sPlayerHP;
+        }
+
+        public static int GetPlayerArmour()
+        {
+            return sPlayerArmour;
+        }
+
+        public static int GetPlayerMana()
+        {
+            return sPlayerMana;
+        }
+
+        public static int GetBossHP()
+        {
+            return sBossHP;
+        }
+
+        static bool ValidSpell(int spellIndex)
+        {
+            var playerMana = sPlayerMana;
+            if (sRechargeTimer > 0)
             {
-                string amount = instruction.Split("deal with increment ")[1];
-                int incrementAmount = int.Parse(amount);
-                A = incrementAmount;
-                B = 0;
+                playerMana += 101;
             }
-            // "deal into new stack"
-            else if (instruction.StartsWith("deal into new stack"))
+            if ((spellIndex == 0) && (playerMana >= 53))
             {
-                A = -1;
-                B = -1;
+                return true;
             }
-            // "cut XXX"
-            else if (instruction.StartsWith("cut "))
+            if ((spellIndex == 1) && (playerMana >= 73))
             {
-                string amount = instruction.Split("cut ")[1];
-                BigInteger cutAmount = int.Parse(amount);
-                cutAmount = ModuloDeckSize(cutAmount);
-                A = +1;
-                B = -cutAmount;
+                return true;
+            }
+            if ((spellIndex == 2) && (playerMana >= 113))
+            {
+                if (sShieldTimer <= 1)
+                {
+                    return true;
+                }
+                return false;
+            }
+            if ((spellIndex == 3) && (playerMana >= 173))
+            {
+                if (sPoisonTimer <= 1)
+                {
+                    return true;
+                }
+                return false;
+            }
+            if ((spellIndex == 4) && (playerMana >= 229))
+            {
+                if (sRechargeTimer <= 1)
+                {
+                    return true;
+                }
+                return false;
+            }
+            return false;
+        }
+
+        static int NextSpell(byte[] spellCombination, int spellDepth)
+        {
+            int spellIndex = spellCombination[spellDepth];
+            if (ValidSpell(spellIndex))
+            {
+                return spellIndex;
+            }
+            return -1;
+        }
+
+        static int LeastManaToWin(int playerDamagePerTurn)
+        {
+            sPlayerDamagePerTurn = playerDamagePerTurn;
+            var leastMana = int.MaxValue;
+
+            var spellCombinationDepth = 12 + 1 * sPlayerDamagePerTurn;
+            byte[] spellCombination = new byte[spellCombinationDepth];
+            long maxNumGames = 1;
+            for (var c = 0; c < spellCombinationDepth; ++c)
+            {
+                maxNumGames *= sSpellCount;
+                spellCombination[c] = 0;
+            }
+            for (long g = 0; g < maxNumGames; ++g)
+            {
+                if ((g % 200000000) == 0)
+                {
+                    Console.WriteLine($"New Game {g + 1}/{maxNumGames} LeastMana:{leastMana}");
+                }
+                var manaCost = RunATestGame(leastMana, spellCombination);
+                if (manaCost < leastMana)
+                {
+                    Console.WriteLine($"New Least Mana {manaCost} {g + 1}/{maxNumGames}");
+                }
+                leastMana = Math.Min(leastMana, manaCost);
+                byte add = 1;
+                for (var c = 0; c < spellCombinationDepth; ++c)
+                {
+                    spellCombination[c] += add;
+                    add = 0;
+                    if (spellCombination[c] >= sSpellCount)
+                    {
+                        spellCombination[c] = 0;
+                        add = 1;
+                    }
+                    if (add == 0)
+                    {
+                        break;
+                    }
+                }
+            }
+            return leastMana;
+        }
+
+        static int ManaCost(int playerSpell)
+        {
+            int manaCost;
+            if (playerSpell == 0)
+            {
+                manaCost = 53;
+            }
+            else if (playerSpell == 1)
+            {
+                manaCost = 73;
+            }
+            else if (playerSpell == 2)
+            {
+                manaCost = 113;
+            }
+            else if (playerSpell == 3)
+            {
+                manaCost = 173;
+            }
+            else if (playerSpell == 4)
+            {
+                manaCost = 229;
             }
             else
             {
-                throw new ArgumentException($"Unknown instruction {instruction}", nameof(instruction));
+                throw new InvalidProgramException($"Unknown playerSpell '{playerSpell}'");
             }
-            A = ModuloDeckSize(A);
-            B = ModuloDeckSize(B);
-            return (A, B);
+            return manaCost;
         }
 
-        private static void ApplyEquation(BigInteger A, BigInteger B)
+        static int RunATestGame(int minManaCost, byte[] spellCombination)
         {
-            for (var i = 0; i < sDeckSize; ++i)
+            var spellDepth = 0;
+            var manaCost = 0;
+            StartGame();
+            do
             {
-                BigInteger newPosition = (A * i + B);
-                newPosition = ModuloDeckSize(newPosition);
-                sDeck[(long)newPosition] = sWorkingDeck[i];
-            }
-        }
-
-        private static void CopyDeckIntoWorkingDeck()
-        {
-            for (var i = 0; i < sDeckSize; ++i)
+                var playerSpell = NextSpell(spellCombination, spellDepth);
+                if (playerSpell == -1)
+                {
+                    return int.MaxValue;
+                }
+                manaCost += ManaCost(playerSpell);
+                if (manaCost > minManaCost)
+                {
+                    return int.MaxValue;
+                }
+                var spell = sSpells[playerSpell];
+                RunTurn(spell);
+                ++spellDepth;
+                if (spellDepth >= spellCombination.Length)
+                {
+                    break;
+                }
+            } while ((sBossHP > 0) && (sPlayerHP > 0));
+            if (sBossHP != 0)
             {
-                sWorkingDeck[i] = sDeck[i];
+                return int.MaxValue;
             }
-        }
-
-        public static string DeckAsString()
-        {
-            if (sDeckSize < 1)
-            {
-                throw new InvalidDataException($"Deck Size must be >= 1 {sDeckSize}");
-            }
-            string result = sDeck[0].ToString();
-            for (var i = 1; i < sDeckSize; ++i)
-            {
-                result += $" {sDeck[i]}";
-            }
-            return result;
+            return manaCost;
         }
 
         public static void Run()
         {
-            Console.WriteLine("Day22 : Start");
+
             _ = new Program("Day22/input.txt", true);
             _ = new Program("Day22/input.txt", false);
             Console.WriteLine("Day22 : End");
