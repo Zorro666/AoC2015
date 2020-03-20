@@ -1,40 +1,43 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 
 /*
 
---- Day 23: Category Six ---
+--- Day 23: Opening the Turing Lock ---
 
-The droids have finished repairing as much of the ship as they can. Their report indicates that this was a Category 6 disaster - not because it was that bad, but because it destroyed the stockpile of Category 6 network cables as well as most of the ship's network infrastructure.
+Little Jane Marie just got her very first computer for Christmas from some unknown benefactor. 
+It comes with instructions and an example program, but the computer itself seems to be malfunctioning. 
+She's curious what the program does, and would like you to help her run it.
 
-You'll need to rebuild the network from scratch.
+The manual explains that the computer supports two registers and six instructions (truly, it goes on to remind the reader, a state-of-the-art technology). 
+The registers are named a and b, can hold any non-negative integer, and begin with a value of 0. 
+The instructions are as follows:
 
-The computers on the network are standard Intcode computers that communicate by sending packets to each other. There are 50 of them in total, each running a copy of the same Network Interface Controller (NIC) software (your puzzle input). The computers have network addresses 0 through 49; when each computer boots up, it will request its network address via a single input instruction. Be sure to give each computer a unique network address.
+hlf r sets register r to half its current value, then continues with the next instruction.
+tpl r sets register r to triple its current value, then continues with the next instruction.
+inc r increments register r, adding 1 to it, then continues with the next instruction.
+jmp offset is a jump; it continues with the instruction offset away relative to itself.
+jie r, offset is like jmp, but only jumps if register r is even ("jump if even").
+jio r, offset is like jmp, but only jumps if register r is 1 ("jump if one", not odd).
 
-Once a computer has received its network address, it will begin doing work and communicating over the network by sending and receiving packets. All packets contain two values named X and Y. Packets sent to a computer are queued by the recipient and read in the order they are received.
+All three jump instructions work with an offset relative to that instruction. 
+The offset is always written with a prefix + or - to indicate the direction of the jump (forward or backward, respectively). 
+For example, jmp +1 would simply continue with the next instruction, while jmp +0 would continuously jump back to itself forever.
 
-To send a packet to another computer, the NIC will use three output instructions that provide the destination address of the packet followed by its X and Y values. For example, three output instructions that provide the values 10, 20, 30 would send a packet with X=20 and Y=30 to the computer with address 10.
+The program exits when it tries to run an instruction beyond the ones defined.
 
-To receive a packet from another computer, the NIC will use an input instruction. If the incoming packet queue is empty, provide -1. Otherwise, provide the X value of the next packet; the computer will then use a second input instruction to receive the Y value for the same packet. Once both values of the packet are read in this way, the packet is removed from the queue.
+For example, this program sets a to 2, because the jio instruction causes it to skip the tpl instruction:
 
-Note that these input and output instructions never block. Specifically, output instructions do not wait for the sent packet to be received - the computer might send multiple packets before receiving any. Similarly, input instructions do not wait for a packet to arrive - if no packet is waiting, input instructions should receive -1.
+inc a
+jio a, +2
+tpl a
+inc a
 
-Boot up all 50 computers and attach them to your network. What is the Y value of the first packet sent to address 255?
-    
-Your puzzle answer was 23626.
+What is the value in register b when the program in your puzzle input is finished executing?
 
 --- Part Two ---
 
-Packets sent to address 255 are handled by a device called a NAT (Not Always Transmitting). The NAT is responsible for managing power consumption of the network by blocking certain packets and watching for idle periods in the computers.
-
-If a packet would be sent to address 255, the NAT receives it instead. The NAT remembers only the last packet it receives; that is, the data in each packet it receives overwrites the NAT's packet memory with the new packet's X and Y values.
-
-The NAT also monitors all computers on the network. If all computers have empty incoming packet queues and are continuously trying to receive packets without sending packets, the network is considered idle.
-
-Once the network is idle, the NAT sends only the last packet it received to address 0; this will cause the computers on the network to resume activity. In this way, the NAT can throttle power consumption of the network when the ship needs power in other areas.
-
-Monitor packets released to the computer at address 0 by the NAT. What is the first Y value delivered by the NAT to the computer at address 0 twice in a row?
+The unknown benefactor is very thankful for releasi-- er, helping little Jane Marie with her computer. 
+Definitely not to distract you, what is the value in register b after the program is finished executing if register a starts as 1 instead?
 
 */
 
@@ -42,160 +45,234 @@ namespace Day23
 {
     class Program
     {
-        static readonly int COMPUTER_COUNT = 50;
-        static readonly IntProgram[] sComputers = new IntProgram[COMPUTER_COUNT];
-        static readonly List<long>[] sInputs = new List<long>[COMPUTER_COUNT];
+        static long sA;
+        static long sB;
+        static long sPC;
+
+        enum Instruction { hlf, tpl, inc, jmp, jie, jio };
+        enum Register { A, B };
+
+        struct Line
+        {
+            public Instruction instruction;
+            public Register register;
+            public int offset;
+        }
+
+        static Line[] sLines;
 
         private Program(string inputFile, bool part1)
         {
-            var program = ReadProgram(inputFile);
-            for (var i = 0; i < COMPUTER_COUNT; ++i)
-            {
-                sComputers[i].CreateProgram(program);
-                sComputers[i].SetNextInput(i);
-                sInputs[i] = new List<long>();
-                sInputs[i].Clear();
-            }
+            var lines = AoC2015.Program.ReadLines(inputFile);
+            ParseInput(lines);
 
             if (part1)
             {
-                long result1 = RunSimulation(part1);
+                RunProgram(0, 0);
+                var result1 = GetB();
                 Console.WriteLine($"Day23: Result1 {result1}");
-                long expected = 23626;
+                var expected = 170;
                 if (result1 != expected)
                 {
-                    throw new InvalidDataException($"Part1 result is broken {result1} != {expected}");
+                    throw new InvalidProgramException($"Part1 result is broken {result1} != {expected}");
                 }
             }
             else
             {
-                long result1 = RunSimulation(part1);
-                Console.WriteLine($"Day23: Result2 {result1}");
-                long expected = 19019;
-                if (result1 != expected)
+                RunProgram(1, 0);
+                var result2 = GetB();
+                Console.WriteLine($"Day23: Result2 {result2}");
+                var expected = 247;
+                if (result2 != expected)
                 {
-                    throw new InvalidDataException($"Part1 result is broken {result1} != {expected}");
+                    throw new InvalidProgramException($"Part2 result is broken {result2} != {expected}");
                 }
             }
         }
 
-        long RunSimulation(bool part1)
+        static Register ParseRegister(string token)
         {
-            long natXValue = long.MinValue;
-            long natYValue = long.MinValue;
-            long lastNATYValue = long.MinValue;
-            long cyclesSinceOutput = 0;
-            while (true)
+            token = token.Trim();
+            if (token == "a")
             {
-                bool areInputsEmpty = true;
-                for (var i = 0; i < COMPUTER_COUNT; ++i)
+                return Register.A;
+            }
+            else if (token == "b")
+            {
+                return Register.B;
+            }
+            throw new InvalidProgramException($"Unknown register token '{token}'");
+        }
+
+        static int ParseOffset(string token)
+        {
+            token = token.Trim();
+            if (int.TryParse(token, out int offset))
+            {
+                return offset;
+            }
+            throw new InvalidProgramException($"Unknown offset token '{token}'");
+        }
+
+        public static void ParseInput(string[] program)
+        {
+            sA = 0;
+            sB = 0;
+            sPC = 0;
+            sLines = new Line[program.Length];
+            for (var l = 0; l < program.Length; ++l)
+            {
+                var programLine = program[l];
+                var tokens = programLine.Split(' ');
+                var instruction = tokens[0];
+                ref var line = ref sLines[l];
+                if (instruction == "hlf")
                 {
-                    if (sInputs[i].Count != 0)
-                    {
-                        areInputsEmpty = false;
-                    }
+                    //hlf r
+                    line.instruction = Instruction.hlf;
+                    line.register = ParseRegister(tokens[1]);
                 }
-                bool hadOutput = false;
-                for (var i = 0; i < COMPUTER_COUNT; ++i)
+                else if (instruction == "tpl")
                 {
-                    bool halt = false;
-                    bool readInput = false;
-                    bool hasOutput = false;
-                    long computerOutput = sComputers[i].SingleStep(ref halt, ref hasOutput, ref readInput);
-                    if (halt)
-                    {
-                        if (readInput)
-                        {
-                            throw new InvalidProgramException($"halt when sending input to computer {i}");
-                        }
-                        if (hasOutput)
-                        {
-                            throw new InvalidProgramException($"halt when reading output from computer {i}");
-                        }
-                        break;
-                    }
-                    if (readInput && hasOutput)
-                    {
-                        throw new InvalidProgramException($"reading input and writing output from computer {i}");
-                    }
-                    if (readInput)
-                    {
-                        long nextInput = -1;
-                        if (sInputs[i].Count > 0)
-                        {
-                            nextInput = sInputs[i][0];
-                            sInputs[i].RemoveAt(0);
-                        }
-                        sComputers[i].SetNextInput(nextInput);
-                        if ((i == 0) && (nextInput != -1))
-                        {
-                            //Console.WriteLine($"Computer {i} Set Next Input {nextInput}");
-                        }
-                    }
-                    if (hasOutput)
-                    {
-                        hadOutput = true;
-                        long destination = computerOutput;
-                        hasOutput = false;
-                        long X = sComputers[i].GetNextOutput(ref halt, ref hasOutput);
-                        if (halt)
-                        {
-                            throw new InvalidProgramException($"halt when reading X value from computer {i}");
-                        }
-                        hasOutput = false;
-                        long Y = sComputers[i].GetNextOutput(ref halt, ref hasOutput);
-                        if (halt)
-                        {
-                            throw new InvalidProgramException($"halt when reading Y value from computer {i}");
-                        }
-                        if (destination == 255)
-                        {
-                            natXValue = X;
-                            natYValue = Y;
-                        }
-                        else if ((destination < 0) || (destination >= COMPUTER_COUNT))
-                        {
-                            throw new InvalidDataException($"Invalid destination {destination} from computer {i}");
-                        }
-                        else
-                        {
-                            sInputs[destination].Add(X);
-                            sInputs[destination].Add(Y);
-                        }
-                        //Console.WriteLine($"Message from {i} to {destination} {X} {Y}");
-                    }
-                    if (part1 && (natYValue != long.MinValue))
-                    {
-                        return natYValue;
-                    }
+                    //tpl r
+                    line.instruction = Instruction.tpl;
+                    line.register = ParseRegister(tokens[1]);
                 }
-                if (hadOutput)
+                else if (instruction == "inc")
                 {
-                    cyclesSinceOutput = 0;
+                    //inc r
+                    line.instruction = Instruction.inc;
+                    line.register = ParseRegister(tokens[1]);
+                }
+                else if (instruction == "jmp")
+                {
+                    //jmp offset
+                    line.instruction = Instruction.jmp;
+                    line.offset = ParseOffset(tokens[1]);
+                }
+                else if (instruction == "jie")
+                {
+                    //jie r, offset
+                    line.instruction = Instruction.jie;
+                    line.register = ParseRegister(tokens[1].TrimEnd(','));
+                    line.offset = ParseOffset(tokens[2]);
+                }
+                else if (instruction == "jio")
+                {
+                    //jio r, offset
+                    line.instruction = Instruction.jio;
+                    line.register = ParseRegister(tokens[1].TrimEnd(','));
+                    line.offset = ParseOffset(tokens[2]);
                 }
                 else
                 {
-                    ++cyclesSinceOutput;
-                }
-                if (areInputsEmpty && (cyclesSinceOutput > 10000) && (natXValue != long.MinValue) && (natYValue != long.MinValue))
-                {
-                    //Console.WriteLine($"Nat X:{natXValue} Y:{natYValue} LastY:{lastNATYValue}");
-                    sInputs[0].Add(natXValue);
-                    sInputs[0].Add(natYValue);
-                    if (lastNATYValue == natYValue)
-                    {
-                        return natYValue;
-                    }
-                    lastNATYValue = natYValue;
-                    cyclesSinceOutput = 0;
+                    throw new InvalidProgramException($"Unknown instruction token {instruction}");
                 }
             }
         }
 
-        private string ReadProgram(string inputFile)
+        public static void RunProgram(int a, int b)
         {
-            var program = File.ReadAllText(inputFile);
-            return program;
+            sA = a;
+            sB = b;
+            sPC = 0;
+            while ((sPC >= 0) && (sPC < sLines.Length))
+            {
+                var current = sLines[sPC];
+                var register = current.register;
+                var offset = current.offset;
+                switch (current.instruction)
+                {
+                    case Instruction.hlf:
+                        if (register == Register.A)
+                        {
+                            sA /= 2;
+                        }
+                        else if (register == Register.B)
+                        {
+                            sB /= 2;
+                        }
+                        else
+                        {
+                            throw new InvalidProgramException($"Unknown register '{register}'");
+                        }
+                        sPC += 1;
+                        break;
+                    case Instruction.tpl:
+                        if (register == Register.A)
+                        {
+                            sA *= 3;
+                        }
+                        else if (register == Register.B)
+                        {
+                            sB *= 3;
+                        }
+                        else
+                        {
+                            throw new InvalidProgramException($"Unknown register '{register}'");
+                        }
+                        sPC += 1;
+                        break;
+                    case Instruction.inc:
+                        if (register == Register.A)
+                        {
+                            sA += 1;
+                        }
+                        else if (register == Register.B)
+                        {
+                            sB += 1;
+                        }
+                        else
+                        {
+                            throw new InvalidProgramException($"Unknown register '{register}'");
+                        }
+                        sPC += 1;
+                        break;
+                    case Instruction.jmp:
+                        sPC += offset;
+                        break;
+                    case Instruction.jie:
+                        if (register == Register.A)
+                        {
+                            offset = (sA % 2 == 0) ? offset : 1;
+                        }
+                        else if (register == Register.B)
+                        {
+                            offset = (sB % 2 == 0) ? offset : 1;
+                        }
+                        else
+                        {
+                            throw new InvalidProgramException($"Unknown register '{register}'");
+                        }
+                        sPC += offset;
+                        break;
+                    case Instruction.jio:
+                        if (register == Register.A)
+                        {
+                            offset = (sA == 1) ? offset : 1;
+                        }
+                        else if (register == Register.B)
+                        {
+                            offset = (sB == 1) ? offset : 1;
+                        }
+                        else
+                        {
+                            throw new InvalidProgramException($"Unknown register '{register}'");
+                        }
+                        sPC += offset;
+                        break;
+                }
+            };
+        }
+
+        public static long GetA()
+        {
+            return sA;
+        }
+
+        public static long GetB()
+        {
+            return sB;
         }
 
         public static void Run()
