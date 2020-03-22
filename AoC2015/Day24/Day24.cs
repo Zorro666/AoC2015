@@ -1,231 +1,77 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 
 /*
 
---- Day 24: Planet of Discord ---
+--- Day 24: It Hangs in the Balance ---
 
-You land on Eris, your last stop before reaching Santa.As soon as you do, your sensors start picking up strange life forms moving around: Eris is infested with bugs! With an over 24-hour roundtrip for messages between you and Earth, you'll have to deal with this problem on your own.
+It's Christmas Eve, and Santa is loading up the sleigh for this year's deliveries. 
+However, there's one small problem: he can't get the sleigh to balance. 
+If it isn't balanced, he can't defy physics, and nobody gets presents this year.
 
-Eris isn't a very large place; a scan of the entire area fits into a 5x5 grid (your puzzle input). The scan shows bugs (#) and empty spaces (.).
+No pressure.
 
-Each minute, The bugs live and die based on the number of bugs in the four adjacent tiles:
+Santa has provided you a list of the weights of every package he needs to fit on the sleigh. 
+The packages need to be split into three groups of exactly the same weight, and every package has to fit. 
+The first group goes in the passenger compartment of the sleigh, and the second and third go in containers on either side. 
+Only when all three groups weigh exactly the same amount will the sleigh be able to fly. 
+Defying physics has rules, you know!
 
-A bug dies(becoming an empty space) unless there is exactly one bug adjacent to it.
-An empty space becomes infested with a bug if exactly one or two bugs are adjacent to it.
-Otherwise, a bug or empty space remains the same. (Tiles on the edges of the grid have fewer than four adjacent tiles; the missing tiles count as empty space.) This process happens in every location simultaneously; that is, within the same minute, the number of adjacent bugs is counted for every tile first, and then the tiles are updated.
+Of course, that's not the only problem. 
+The first group - the one going in the passenger compartment - needs as few packages as possible so that Santa has some legroom left over. 
+It doesn't matter how many packages are in either of the other two groups, so long as all of the groups weigh the same.
 
-Here are the first few minutes of an example scenario:
+Furthermore, Santa tells you, if there are multiple ways to arrange the packages such that the fewest possible are in the first group, you need to choose the way where the first group has the smallest quantum entanglement to reduce the chance of any "complications".
+The quantum entanglement of a group of packages is the product of their weights, that is, the value you get when you multiply their weights together. 
+Only consider quantum entanglement if the first group has the fewest possible number of packages in it and all groups weigh the same amount.
 
+For example, suppose you have ten packages with weights 1 through 5 and 7 through 11. 
+For this situation, some of the unique first groups, their quantum entanglements, and a way to divide the remaining packages are as follows:
 
-Initial state:
-....#
-#..#.
-#..##
-..#..
-#....
+Group 1;             Group 2; Group 3
+11 9       (QE= 99); 10 8 2;  7 5 4 3 1
+10 9 1     (QE= 90); 11 7 2;  8 5 4 3
+10 8 2     (QE=160); 11 9;    7 5 4 3 1
+10 7 3     (QE=210); 11 9;    8 5 4 2 1
+10 5 4 1   (QE=200); 11 9;    8 7 3 2
+10 5 3 2   (QE=300); 11 9;    8 7 4 1
+10 4 3 2 1 (QE=240); 11 9;    8 7 5
+9 8 3      (QE=216); 11 7 2;  10 5 4 1
+9 7 4      (QE=252); 11 8 1;  10 5 3 2
+9 5 4 2    (QE=360); 11 8 1;  10 7 3
+8 7 5      (QE=280); 11 9;    10 4 3 2 1
+8 5 4 3    (QE=480); 11 9;    10 7 2 1
+7 5 4 3 1  (QE=420); 11 9;    10 8 2
 
-After 1 minute:
-#..#.
-####.
-###.#
-##.##
-.##..
+Of these, although 10 9 1 has the smallest quantum entanglement (90), the configuration with only two packages, 11 9, in the passenger compartment gives Santa the most legroom and wins. 
+In this situation, the quantum entanglement for the ideal configuration is therefore 99. 
+Had there been two configurations with only two packages in the first group, the one with the smaller quantum entanglement would be chosen.
 
-After 2 minutes:
-#####
-....#
-....#
-...#.
-#.###
+What is the quantum entanglement of the first group of packages in the ideal configuration?
 
-After 3 minutes:
-#....
-####.
-...##
-#.##.
-.##.#
-
-After 4 minutes:
-####.
-....#
-##..#
-.....
-##...
-To understand the nature of the bugs, watch for the first time a layout of bugs and empty spaces matches any previous layout. In the example above, the first layout to appear twice is:
-
-.....
-.....
-.....
-#....
-.#...
-To calculate the biodiversity rating for this layout, consider each tile left-to-right in the top row, then left-to-right in the second row, and so on.Each of these tiles is worth biodiversity points equal to increasing powers of two: 1, 2, 4, 8, 16, 32, and so on.Add up the biodiversity points for tiles with bugs; in this example, the 16th tile (32768 points) and 22nd tile (2097152 points) have bugs, a total biodiversity rating of 2129920.
-
-What is the biodiversity rating for the first layout that appears twice?
-
-Your puzzle answer was 17863741.
+Your puzzle answer was 10723906903.
 
 --- Part Two ---
 
-After careful analysis, one thing is certain: you have no idea where all these bugs are coming from.
+That's weird... the sleigh still isn't balancing.
 
-Then, you remember: Eris is an old Plutonian settlement! Clearly, the bugs are coming from recursively-folded space.
+"Ho ho ho", Santa muses to himself. "I forgot the trunk".
 
-This 5x5 grid is only one level in an infinite number of recursion levels. The tile in the middle of the grid is actually another 5x5 grid, the grid in your scan is contained as the middle tile of a larger 5x5 grid, and so on. Two levels of grids look like this:
+Balance the sleigh again, but this time, separate the packages into four groups instead of three. 
+The other constraints still apply.
 
-     |     |         |     |     
-     |     |         |     |     
-     |     |         |     |     
------+-----+---------+-----+-----
-     |     |         |     |     
-     |     |         |     |     
-     |     |         |     |     
------+-----+---------+-----+-----
-     |     | | | | | |     |     
-     |     |-+-+-+-+-|     |     
-     |     | | | | | |     |     
-     |     |-+-+-+-+-|     |     
-     |     | | |?| | |     |     
-     |     |-+-+-+-+-|     |     
-     |     | | | | | |     |     
-     |     |-+-+-+-+-|     |     
-     |     | | | | | |     |     
------+-----+---------+-----+-----
-     |     |         |     |     
-     |     |         |     |     
-     |     |         |     |     
------+-----+---------+-----+-----
-     |     |         |     |     
-     |     |         |     |     
-     |     |         |     |     
-(To save space, some of the tiles are not drawn to scale.) Remember, this is only a small part of the infinitely recursive grid; there is a 5x5 grid that contains this diagram, and a 5x5 grid that contains that one, and so on. Also, the ? in the diagram contains another 5x5 grid, which itself contains another 5x5 grid, and so on.
+Given the example packages above, this would be some of the new unique first groups, their quantum entanglements, and one way to divide the remaining packages:
 
-The scan you took (your puzzle input) shows where the bugs are on a single level of this structure. The middle tile of your scan is empty to accommodate the recursive grids within it. Initially, no other levels contain bugs.
+11 4    (QE=44); 10 5;   9 3 2 1; 8 7
+10 5    (QE=50); 11 4;   9 3 2 1; 8 7
+9 5 1   (QE=45); 11 4;   10 3 2;  8 7
+9 4 2   (QE=72); 11 3 1; 10 5;    8 7
+9 3 2 1 (QE=54); 11 4;   10 5;    8 7
+8 7     (QE=56); 11 4;   10 5;    9 3 2 1
+Of these, there are three arrangements that put the minimum (two) number of packages in the first group: 11 4, 10 5, and 8 7. 
+Of these, 11 4 has the lowest quantum entanglement, and so it is selected.
 
-Tiles still count as adjacent if they are directly up, down, left, or right of a given tile. Some tiles have adjacent tiles at a recursion level above or below its own level. For example:
-
-     |     |         |     |     
-  1  |  2  |    3    |  4  |  5  
-     |     |         |     |     
------+-----+---------+-----+-----
-     |     |         |     |     
-  6  |  7  |    8    |  9  |  10 
-     |     |         |     |     
------+-----+---------+-----+-----
-     |     |A|B|C|D|E|     |     
-     |     |-+-+-+-+-|     |     
-     |     |F|G|H|I|J|     |     
-     |     |-+-+-+-+-|     |     
- 11  | 12  |K|L|?|N|O|  14 |  15 
-     |     |-+-+-+-+-|     |     
-     |     |P|Q|R|S|T|     |     
-     |     |-+-+-+-+-|     |     
-     |     |U|V|W|X|Y|     |     
------+-----+---------+-----+-----
-     |     |         |     |     
- 16  | 17  |    18   |  19 |  20 
-     |     |         |     |     
------+-----+---------+-----+-----
-     |     |         |     |     
- 21  | 22  |    23   |  24 |  25 
-     |     |         |     |     
-Tile 19 has four adjacent tiles: 14, 18, 20, and 24.
-Tile G has four adjacent tiles: B, F, H, and L.
-Tile D has four adjacent tiles: 8, C, E, and I.
-Tile E has four adjacent tiles: 8, D, 14, and J.
-Tile 14 has eight adjacent tiles: 9, E, J, O, T, Y, 15, and 19.
-Tile N has eight adjacent tiles: I, O, S, and five tiles within the sub-grid marked ?.
-The rules about bugs living and dying are the same as before.
-
-For example, consider the same initial state as above:
-
-....#
-#..#.
-#.?##
-..#..
-#....
-The center tile is drawn as ? to indicate the next recursive grid. Call this level 0; the grid within this one is level 1, and the grid that contains this one is level -1. Then, after ten minutes, the grid at each level would look like this:
-
-Depth -5:
-..#..
-.#.#.
-..?.#
-.#.#.
-..#..
-
-Depth -4:
-...#.
-...##
-..?..
-...##
-...#.
-
-Depth -3:
-#.#..
-.#...
-..?..
-.#...
-#.#..
-
-Depth -2:
-.#.##
-....#
-..?.#
-...##
-.###.
-
-Depth -1:
-#..##
-...##
-..?..
-...#.
-.####
-
-Depth 0:
-.#...
-.#.##
-.#?..
-.....
-.....
-
-Depth 1:
-.##..
-#..##
-..?.#
-##.##
-#####
-
-Depth 2:
-###..
-##.#.
-#.?..
-.#.##
-#.#..
-
-Depth 3:
-..###
-.....
-#.?..
-#....
-#...#
-
-Depth 4:
-.###.
-#..#.
-#.?..
-##.#.
-.....
-
-Depth 5:
-####.
-#..#.
-#.?#.
-####.
-.....
-In this example, after 10 minutes, a total of 99 bugs are present.
-
-Starting with your scan, how many bugs are present after 200 minutes?
+Now, what is the quantum entanglement of the first group of packages in the ideal configuration?
 
 */
 
@@ -233,440 +79,279 @@ namespace Day24
 {
     class Program
     {
-        static readonly int MAP_WIDTH = 5;
-        static readonly int MAP_HEIGHT = 5;
-        static int sMinDepth = 0;
-        static int sMaxDepth = 0;
-        static Dictionary<int, int[,]> sCellsPointers;
-        static Dictionary<int, int[,]> sAdjacencyCountsPointers;
-        static HashSet<int> sBioDiversities;
+        static int sTotalWeight;
+        static int sGroupWeight;
+        static int sNumGroups;
+
+        static int[] sWeights;
+        static int[] sWeightGroups;
+        static bool[] sUsedWeights;
+        static long sMinQE;
+        static long sNumItemsInQE;
+        static List<long> sPotentialQEs;
+        static List<long> sQEs;
 
         private Program(string inputFile, bool part1)
         {
-            var lines = ReadFile(inputFile);
-            ParseInput(lines);
+            var lines = AoC2015.Program.ReadLines(inputFile);
 
             if (part1)
             {
-                var result1 = -666;
-                for (var i = 0; i < 100000; ++i)
-                {
-                    Simulate(1, part1);
-                    var bioDiversity = BioDiversityRating();
-                    if (sBioDiversities.Contains(bioDiversity))
-                    {
-                        result1 = bioDiversity;
-                        break;
-                    }
-                    else
-                    {
-                        sBioDiversities.Add(bioDiversity);
-                    }
-                    if (result1 != -666)
-                    {
-                        break;
-                    }
-                }
+                ParseInput(lines, 3);
+                var result1 = SmallestQE();
                 Console.WriteLine($"Day24: Result1 {result1}");
-                var expected = 17863741;
+                var expected = 10723906903;
                 if (result1 != expected)
                 {
-                    throw new InvalidDataException($"Part1 is broken {result1} != {expected}");
+                    throw new InvalidProgramException($"Part1 is broken {result1} != {expected}");
                 }
             }
             else
             {
-                Simulate(200, part1);
-                var result2 = TotalCount();
-                Console.WriteLine($"Day24: {sMinDepth} -> {sMaxDepth}");
+                ParseInput(lines, 4);
+                var result2 = SmallestQE();
                 Console.WriteLine($"Day24: Result2 {result2}");
-                var expected = 2029;
+                var expected = 74850409;
                 if (result2 != expected)
                 {
-                    throw new InvalidDataException($"Part2 is broken {result2} != {expected}");
+                    throw new InvalidProgramException($"Part2 is broken {result2} != {expected}");
                 }
             }
         }
 
-        private string[] ReadFile(string inputFile)
+        public static void ParseInput(string[] lines, int numGroups)
         {
-            var lines = File.ReadAllLines(inputFile);
-            return lines;
-        }
+            sWeights = new int[lines.Length];
+            sWeightGroups = new int[lines.Length];
+            sUsedWeights = new bool[sWeights.Length];
+            sPotentialQEs = new List<long>(sWeights.Length);
+            sQEs = new List<long>(sWeights.Length);
+            sTotalWeight = 0;
+            sMinQE = long.MaxValue;
+            sNumItemsInQE = lines.Length;
+            sNumGroups = numGroups;
 
-        public static void ParseInput(string[] lines)
-        {
-            var depth = 0;
-            int[,] cells = new int[MAP_WIDTH, MAP_HEIGHT];
-            sCellsPointers = new Dictionary<int, int[,]>(1000);
-            sAdjacencyCountsPointers = new Dictionary<int, int[,]>(1000);
-            sBioDiversities = new HashSet<int>(100000);
+            ClearWeightGroups();
 
-            sCellsPointers[depth] = cells;
-            for (var y = 0; y < MAP_HEIGHT; ++y)
+            for (var l = 0; l < lines.Length; ++l)
             {
-                for (var x = 0; x < MAP_WIDTH; ++x)
+                var line = lines[l];
+                sWeights[l] = int.Parse(line);
+                sTotalWeight += sWeights[l];
+            }
+            for (int i = 0; i < sWeights.Length - 1; ++i)
+            {
+                for (int j = i + 1; j < sWeights.Length; ++j)
                 {
-                    cells[x, y] = 0;
+                    var weightI = sWeights[i];
+                    var weightJ = sWeights[j];
+                    if (weightJ > weightI)
+                    {
+                        sWeights[i] = weightJ;
+                        sWeights[j] = weightI;
+                    }
                 }
             }
-            if (lines.Length != MAP_HEIGHT)
+
+            sGroupWeight = sTotalWeight / numGroups;
+            if (sGroupWeight * numGroups != sTotalWeight)
             {
-                throw new InvalidDataException($"Input data wrong height {lines.Length} != {MAP_HEIGHT}");
-            }
-            for (var y = 0; y < MAP_HEIGHT; ++y)
-            {
-                var line = lines[y];
-                if (line.Length != MAP_HEIGHT)
-                {
-                    throw new InvalidDataException($"Input Line {y} data wrong width {line.Length} != {MAP_WIDTH}");
-                }
-                for (var x = 0; x < MAP_WIDTH; ++x)
-                {
-                    var cell = line[x];
-                    if (cell == '.')
-                    {
-                        cells[x, y] = 0;
-                    }
-                    else if (cell == '#')
-                    {
-                        cells[x, y] = 1;
-                    }
-                    else
-                    {
-                        throw new InvalidDataException($"Invalid input {x},{y} '{cell}'");
-                    }
-                }
+                throw new InvalidProgramException($"Invalid total weight not a multiple of {numGroups} {sTotalWeight} {sGroupWeight}");
             }
         }
 
-        public static void Simulate(int numIterations, bool nonRecursive)
+        public static void ComputeQEs()
         {
-            for (var i = 0; i < numIterations; ++i)
+            FindQEs(0, sGroupWeight, 1);
+        }
+
+        public static bool IsQEValid(int weightLeft, int qeCount)
+        {
+            for (var w = 0; w < sWeights.Length; ++w)
             {
-                sMinDepth -= 1;
-                sMaxDepth += 1;
-                if (nonRecursive)
+                if (sUsedWeights[w] == true)
                 {
-                    sMinDepth = 0;
-                    sMaxDepth = 0;
+                    continue;
                 }
-                for (var d = sMinDepth; d <= sMaxDepth; ++d)
+                int weight = sWeights[w];
+                if (weightLeft >= weight)
                 {
-                    if (!sAdjacencyCountsPointers.ContainsKey(d))
+                    var orgWeightLeft = weightLeft;
+                    sUsedWeights[w] = true;
+                    weightLeft -= weight;
+                    if (weightLeft == 0)
                     {
-                        sAdjacencyCountsPointers[d] = new int[MAP_WIDTH, MAP_HEIGHT];
-                    }
-                    if (!sCellsPointers.ContainsKey(d))
-                    {
-                        sCellsPointers[d] = new int[MAP_WIDTH, MAP_HEIGHT];
-                        var cells = sCellsPointers[d];
-                        for (var y = 0; y < MAP_HEIGHT; ++y)
+                        ++qeCount;
+                        if (qeCount > sNumGroups)
                         {
-                            for (var x = 0; x < MAP_WIDTH; ++x)
+                            return false;
+                        }
+                        bool usedAllWeights = true;
+                        foreach (var uw in sUsedWeights)
+                        {
+                            if (uw == false)
                             {
-                                cells[x, y] = 0;
+                                usedAllWeights = false;
+                                break;
                             }
                         }
-                    }
-                    var adjacencyCounts = sAdjacencyCountsPointers[d];
-                    for (var y = 0; y < MAP_HEIGHT; ++y)
-                    {
-                        for (var x = 0; x < MAP_WIDTH; ++x)
+                        if (usedAllWeights)
                         {
-                            adjacencyCounts[x, y] = 0;
+                            if (qeCount == sNumGroups)
+                            {
+                                return true;
+                            }
+                            return false;
                         }
+                        return IsQEValid(sGroupWeight, qeCount);
                     }
-
-                    for (var y = 0; y < MAP_HEIGHT; ++y)
+                    var result = IsQEValid(weightLeft, qeCount);
+                    if (result)
                     {
-                        for (var x = 0; x < MAP_WIDTH; ++x)
-                        {
-                            var nonEmptyCount = 0;
-                            nonEmptyCount += CellCount(d, x + 0, y - 1, nonRecursive, x, y);
-                            nonEmptyCount += CellCount(d, x - 1, y + 0, nonRecursive, x, y);
-                            nonEmptyCount += CellCount(d, x + 1, y + 0, nonRecursive, x, y);
-                            nonEmptyCount += CellCount(d, x + 0, y + 1, nonRecursive, x, y);
-                            adjacencyCounts[x, y] = nonEmptyCount;
-                        }
+                        return true;
                     }
+                    weightLeft = orgWeightLeft;
+                    sUsedWeights[w] = false;
                 }
+            }
+            return false;
+        }
 
-                for (var d = sMinDepth; d <= sMaxDepth; ++d)
+        static void ClearWeightGroups()
+        {
+            for (var w = 0; w < sWeightGroups.Length; ++w)
+            {
+                sWeightGroups[w] = 0;
+                sUsedWeights[w] = false;
+            }
+        }
+
+        static void FindQEs(int start, int weightLeft, long qe)
+        {
+            for (var w = start; w < sWeights.Length; ++w)
+            {
+                if (sUsedWeights[w] == true)
                 {
-                    var cells = sCellsPointers[d];
-                    var adjacencyCounts = sAdjacencyCountsPointers[d];
-                    for (var y = 0; y < MAP_HEIGHT; ++y)
+                    continue;
+                }
+                int weight = sWeights[w];
+                if (weightLeft >= weight)
+                {
+                    var orgQE = qe;
+                    var orgWeightLeft = weightLeft;
+                    sUsedWeights[w] = true;
+                    weightLeft -= weight;
+                    qe *= weight;
+                    if (weightLeft == 0)
                     {
-                        for (var x = 0; x < MAP_WIDTH; ++x)
+                        if (sPotentialQEs.Contains(qe) == false)
                         {
-                            var adjacentCount = adjacencyCounts[x, y];
-                            var oldValue = cells[x, y];
-                            var newValue = oldValue;
-                            if ((oldValue == 0) && ((adjacentCount == 1) || (adjacentCount == 2)))
-                            {
-                                newValue = 1;
-                            }
-                            else if ((oldValue == 1) && (adjacentCount != 1))
-                            {
-                                newValue = 0;
-                            }
-                            if (!nonRecursive && (x == 2) && (y == 2))
-                            {
-                                newValue = 0;
-                            }
-
-                            cells[x, y] = newValue;
+                            sPotentialQEs.Add(qe);
                         }
+                        var orgUsedWeights = new bool[sUsedWeights.Length];
+                        for (var i = 0; i < sUsedWeights.Length; ++i)
+                        {
+                            orgUsedWeights[i] = sUsedWeights[i];
+                        }
+                        if (IsQEValid(sGroupWeight, 1) == true)
+                        {
+                            if (sQEs.Contains(qe) == false)
+                            {
+                                sQEs.Add(qe);
+                            }
+                        }
+                        for (var i = 0; i < sUsedWeights.Length; ++i)
+                        {
+                            sUsedWeights[i] = orgUsedWeights[i];
+                        }
+                        sUsedWeights[w] = false;
+                        return;
                     }
+                    FindQEs(w + 1, weightLeft, qe);
+                    weightLeft = orgWeightLeft;
+                    qe = orgQE;
+                    sUsedWeights[w] = false;
                 }
             }
         }
 
-        /*
-        -----+-----+---------+-----+-----
-             |     |         |     |     
-          6  |  7  |    8    |  9  |  10 
-             |     |         |     |     
-        -----+-----+---------+-----+-----
-             |     |A|B|C|D|E|     |     
-             |     |-+-+-+-+-|     |     
-             |     |F|G|H|I|J|     |     
-             |     |-+-+-+-+-|     |     
-         11  | 12  |K|L|?|N|O|  14 |  15 
-             |     |-+-+-+-+-|     |     
-             |     |P|Q|R|S|T|     |     
-             |     |-+-+-+-+-|     |     
-             |     |U|V|W|X|Y|     |     
-        -----+-----+---------+-----+-----
-             |     |         |     |     
-         16  | 17  |    18   |  19 |  20 
-             |     |         |     |     
-        -----+-----+---------+-----+-----
-        */
-        private static int CellCount(int depth, int x, int y, bool nonRecursive, int fromX, int fromY)
+        static void FindSmallestQE(int start, int weightLeft, long qe, long numItemsInQE)
         {
-            if (((x < 0) || (x >= MAP_WIDTH)) && ((y < 0) || (y >= MAP_HEIGHT)))
+            for (var w = start; w < sWeights.Length; ++w)
             {
-                throw new ArgumentOutOfRangeException($"Invalid x,y {x},{y}");
-            }
-            if (x == -1)
-            {
-                if (nonRecursive)
+                if (sUsedWeights[w] == true)
                 {
-                    return 0;
+                    continue;
                 }
-                else
+                int weight = sWeights[w];
+                if (weightLeft >= weight)
                 {
-                    // Go up one level and get cell : x = 1, y = 2
-                    var d = depth - 1;
-                    if (sCellsPointers.ContainsKey(d))
+                    var orgNumItemsInQE = numItemsInQE;
+                    var orgQE = qe;
+                    var orgWeightLeft = weightLeft;
+                    sUsedWeights[w] = true;
+                    weightLeft -= weight;
+                    qe *= weight;
+                    ++numItemsInQE;
+                    if ((qe < sMinQE) || (numItemsInQE < sNumItemsInQE))
                     {
-                        var cells = sCellsPointers[d];
-                        return cells[1, 2];
-                    }
-                    else
-                    {
-                        return 0;
-                    }
-                }
-            }
-            else if (x == MAP_WIDTH)
-            {
-                if (nonRecursive)
-                {
-                    return 0;
-                }
-                else
-                {
-                    // Go up one level and get cell : x = 3, y = 2
-                    var d = depth - 1;
-                    if (sCellsPointers.ContainsKey(d))
-                    {
-                        var cells = sCellsPointers[d];
-                        return cells[3, 2];
-                    }
-                    else
-                    {
-                        return 0;
-                    }
-                }
-            }
-            else if ((x < 0) || (x >= MAP_WIDTH))
-            {
-                throw new ArgumentOutOfRangeException($"Invalid x {x}");
-            }
-            else if (y == -1)
-            {
-                if (nonRecursive)
-                {
-                    return 0;
-                }
-                else
-                {
-                    // Go up one level and get cell : x = 2, y = 1
-                    var d = depth - 1;
-                    if (sCellsPointers.ContainsKey(d))
-                    {
-                        var cells = sCellsPointers[d];
-                        return cells[2, 1];
-                    }
-                    else
-                    {
-                        return 0;
-                    }
-                }
-            }
-            else if (y == MAP_WIDTH)
-            {
-                if (nonRecursive)
-                {
-                    return 0;
-                }
-                else
-                {
-                    // Go up one level and get cell : x = 2, y = 3
-                    var d = depth - 1;
-                    if (sCellsPointers.ContainsKey(d))
-                    {
-                        var cells = sCellsPointers[d];
-                        return cells[2, 3];
-                    }
-                    else
-                    {
-                        return 0;
-                    }
-                }
-            }
-            else if ((y < 0) || (y >= MAP_HEIGHT))
-            {
-                throw new ArgumentOutOfRangeException($"Invalid y {y}");
-            }
-            else if ((x == 2) && (y == 2))
-            {
-                if (nonRecursive)
-                {
-                    var cells = sCellsPointers[depth];
-                    return cells[x, y];
-                }
-                else
-                {
-                    // Go down one level and total the row, column
-                    var d = depth + 1;
-                    if (sCellsPointers.ContainsKey(d))
-                    {
-                        var cells = sCellsPointers[d];
-                        var count = 0;
-                        // Get the level below left column
-                        if ((fromX == 1) && (fromY == 2))
+                        if (weightLeft == 0)
                         {
-                            for (var childY = 0; childY < MAP_HEIGHT; ++childY)
+                            if (sPotentialQEs.Contains(qe) == false)
                             {
-                                count += cells[0, childY];
+                                sPotentialQEs.Add(qe);
                             }
-                        }
-                        // Get the level below right column
-                        else if ((fromX == 3) && (fromY == 2))
-                        {
-                            for (var childY = 0; childY < MAP_HEIGHT; ++childY)
+                            var orgUsedWeights = new bool[sUsedWeights.Length];
+                            for (var i = 0; i < sUsedWeights.Length; ++i)
                             {
-                                count += cells[4, childY];
+                                orgUsedWeights[i] = sUsedWeights[i];
                             }
-                        }
-                        // Get the level below top row
-                        else if ((fromX == 2) && (fromY == 1))
-                        {
-                            for (var childX = 0; childX < MAP_WIDTH; ++childX)
+                            if (IsQEValid(sGroupWeight, 1) == true)
                             {
-                                count += cells[childX, 0];
+                                if (sQEs.Contains(qe) == false)
+                                {
+                                    sQEs.Add(qe);
+                                    //Console.WriteLine($"Found QE {qe}");
+                                    if (numItemsInQE < sNumItemsInQE)
+                                    {
+                                        sMinQE = qe;
+                                        sNumItemsInQE = numItemsInQE;
+                                    }
+                                    else if (numItemsInQE == sNumItemsInQE)
+                                    {
+                                        if (qe < sMinQE)
+                                        {
+                                            sMinQE = qe;
+                                        }
+                                    }
+                                }
                             }
-                        }
-                        // Get the level below bottom row
-                        else if ((fromX == 2) && (fromY == 3))
-                        {
-                            for (var childX = 0; childX < MAP_WIDTH; ++childX)
+                            for (var i = 0; i < sUsedWeights.Length; ++i)
                             {
-                                count += cells[childX, 4];
+                                sUsedWeights[i] = orgUsedWeights[i];
                             }
+                            sUsedWeights[w] = false;
+                            return;
                         }
-                        return count;
+                        FindSmallestQE(w + 1, weightLeft, qe, numItemsInQE);
                     }
-                    else
-                    {
-                        return 0;
-                    }
+                    weightLeft = orgWeightLeft;
+                    qe = orgQE;
+                    numItemsInQE = orgNumItemsInQE;
+                    sUsedWeights[w] = false;
                 }
-            }
-            else
-            {
-                var cells = sCellsPointers[depth];
-                return cells[x, y];
             }
         }
 
-        public static int BioDiversityRating()
+        public static long SmallestQE()
         {
-            var bioDiversity = 0;
-            var cellValue = 1;
-            var depth = 0;
-            var cells = sCellsPointers[depth];
-            for (var y = 0; y < MAP_HEIGHT; ++y)
-            {
-                for (var x = 0; x < MAP_WIDTH; ++x)
-                {
-                    if (cells[x, y] == 1)
-                    {
-                        bioDiversity += cellValue;
-                    }
-                    cellValue *= 2;
-                }
-            }
-            return bioDiversity;
+            FindSmallestQE(0, sGroupWeight, 1, 0);
+            return sMinQE;
         }
 
-        public static int TotalCount()
+        public static bool QEExists(long qe)
         {
-            var count = 0;
-            for (var d = sMinDepth; d <= sMaxDepth; ++d)
-            {
-                var cells = sCellsPointers[d];
-                for (var y = 0; y < MAP_HEIGHT; ++y)
-                {
-                    for (var x = 0; x < MAP_WIDTH; ++x)
-                    {
-                        count += cells[x, y];
-                    }
-                }
-            }
-            return count;
-        }
-
-        public static string[] CurrentState(int depth)
-        {
-            var cells = sCellsPointers[depth];
-            var result = new string[MAP_HEIGHT];
-            for (var y = 0; y < MAP_HEIGHT; ++y)
-            {
-                string line = "";
-                for (var x = 0; x < MAP_WIDTH; ++x)
-                {
-                    var cell = cells[x, y];
-                    if (cell == 0)
-                    {
-                        line += '.';
-                    }
-                    else if (cell == 1)
-                    {
-                        line += '#';
-                    }
-                    else
-                    {
-                        throw new InvalidDataException($"Invalid cell {x},{y} '{cell}'");
-                    }
-                }
-                result[y] = line;
-            }
-            return result;
+            return sQEs.Contains(qe);
         }
 
         public static void Run()

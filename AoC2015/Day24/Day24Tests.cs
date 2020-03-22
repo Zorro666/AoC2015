@@ -6,196 +6,88 @@ namespace Day24
     [TestFixture]
     public class Tests
     {
-        private static readonly string[] StartingState = {
-"....#",
-"#..#.",
-"#..##",
-"..#..",
-"#...."
+        private static readonly string[] TestPackages = {
+"1",
+"2",
+"3",
+"4",
+"5",
+"7",
+"8",
+"9",
+"10",
+"11",
 };
 
-        private static readonly string[] AfterOneMinute = {
-"#..#.",
-"####.",
-"###.#",
-"##.##",
-".##.."
-};
-
-        private static readonly string[] AfterTwoMinutes = {
-"#####",
-"....#",
-"....#",
-"...#.",
-"#.###"
-};
-
-        private static readonly string[] AfterThreeMinutes = {
-"#....",
-"####.",
-"...##",
-"#.##.",
-".##.#"
-};
-
-        private static readonly string[] AfterFourMinutes = {
-"####.",
-"....#",
-"##..#",
-".....",
-"##..."
-};
-
-        private static readonly string[] SimilarState = {
-".....",
-".....",
-".....",
-"#....",
-".#..."
-};
-
-        private static readonly string[] RecursiveDepthMinus5 = {
-"..#..",
-".#.#.",
-"....#",
-".#.#.",
-"..#.."
-};
-
-        private static readonly string[] RecursiveDepthMinus4 = {
-"...#.",
-"...##",
-".....",
-"...##",
-"...#."
-};
-
-        private static readonly string[] RecursiveDepthMinus3 = {
-"#.#..",
-".#...",
-".....",
-".#...",
-"#.#.."
-};
-
-        private static readonly string[] RecursiveDepthMinus2 = {
-".#.##",
-"....#",
-"....#",
-"...##",
-".###."
-};
-
-        private static readonly string[] RecursiveDepthMinus1 = {
-"#..##",
-"...##",
-".....",
-"...#.",
-".####"
-};
-
-        private static readonly string[] RecursiveDepth0 = {
-".#...",
-".#.##",
-".#...",
-".....",
-"....."
-};
-
-        private static readonly string[] RecursiveDepthPlus1 = {
-".##..",
-"#..##",
-"....#",
-"##.##",
-"#####"
-};
-
-        private static readonly string[] RecursiveDepthPlus2 = {
-"###..",
-"##.#.",
-"#....",
-".#.##",
-"#.#.."
-};
-
-        private static readonly string[] RecursiveDepthPlus3 = {
-"..###",
-".....",
-"#....",
-"#....",
-"#...#"
-};
-
-        private static readonly string[] RecursiveDepthPlus4 = {
-".###.",
-"#..#.",
-"#....",
-"##.#.",
-"....."
-};
-
-        private static readonly string[] RecursiveDepthPlus5 = {
-"####.",
-"#..#.",
-"#..#.",
-"####.",
-"....."
-};
-        /*
-        In this example, after 10 minutes, a total of 99 bugs are present.
-        */
-        public static IEnumerable<TestCaseData> SimulateNonRecursiveTestCases => new[]
+        public static IEnumerable<TestCaseData> TestPackageCases => new[]
         {
-            new TestCaseData(StartingState, 1, AfterOneMinute).SetName("Simulate Non Recursive - 1 Minute"),
-            new TestCaseData(StartingState, 2, AfterTwoMinutes).SetName("Simulate Non Recursive - 2 Minutes"),
-            new TestCaseData(StartingState, 3, AfterThreeMinutes).SetName("Simulate Non Recursive - 3 Minutes"),
-            new TestCaseData(StartingState, 4, AfterFourMinutes).SetName("Simulate Non Recursive - 4 Minutes"),
-        };
-
-        public static IEnumerable<TestCaseData> BioDiversityTestCases => new[]
-        {
-            new TestCaseData(SimilarState, 2129920).SetName("StableState 2129920"),
-        };
-
-        public static IEnumerable<TestCaseData> SimulateRecursiveTestCases => new[]
-        {
-            new TestCaseData(StartingState, -5, RecursiveDepthMinus5).SetName("Simulate Recursive - Depth -5"),
-            new TestCaseData(StartingState, -4, RecursiveDepthMinus4).SetName("Simulate Recursive - Depth -4"),
-            new TestCaseData(StartingState, -3, RecursiveDepthMinus3).SetName("Simulate Recursive - Depth -3"),
-            new TestCaseData(StartingState, -2, RecursiveDepthMinus2).SetName("Simulate Recursive - Depth -2"),
-            new TestCaseData(StartingState, -1, RecursiveDepthMinus1).SetName("Simulate Recursive - Depth -1"),
-            new TestCaseData(StartingState, 0, RecursiveDepth0).SetName("Simulate Recursive - Depth 0"),
-            new TestCaseData(StartingState, 1, RecursiveDepthPlus1).SetName("Simulate Recursive - Depth +1"),
-            new TestCaseData(StartingState, 2, RecursiveDepthPlus2).SetName("Simulate Recursive - Depth +2"),
-            new TestCaseData(StartingState, 3, RecursiveDepthPlus3).SetName("Simulate Recursive - Depth +3"),
-            new TestCaseData(StartingState, 4, RecursiveDepthPlus4).SetName("Simulate Recursive - Depth +4"),
-            new TestCaseData(StartingState, 5, RecursiveDepthPlus5).SetName("Simulate Recursive - Depth +5"),
+            new TestCaseData(TestPackages, 90).SetName("TestPackages QE 90"),
+            new TestCaseData(TestPackages, 99).SetName("TestPackages QE 99"),
+            new TestCaseData(TestPackages, 160).SetName("TestPackages QE 160"),
+            new TestCaseData(TestPackages, 200).SetName("TestPackages QE 200"),
+            new TestCaseData(TestPackages, 210).SetName("TestPackages QE 210"),
+            new TestCaseData(TestPackages, 216).SetName("TestPackages QE 216"),
+            new TestCaseData(TestPackages, 240).SetName("TestPackages QE 240"),
+            new TestCaseData(TestPackages, 252).SetName("TestPackages QE 252"),
+            new TestCaseData(TestPackages, 280).SetName("TestPackages QE 280"),
+            new TestCaseData(TestPackages, 300).SetName("TestPackages QE 300"),
+            new TestCaseData(TestPackages, 360).SetName("TestPackages QE 360"),
+            new TestCaseData(TestPackages, 420).SetName("TestPackages QE 420"),
+            new TestCaseData(TestPackages, 480).SetName("TestPackages QE 480"),
         };
 
         [Test]
-        [TestCaseSource("SimulateNonRecursiveTestCases")]
-        public void SimulateNonRecursiveTests(string[] start, int numIterations, string[] expectedState)
+        [TestCaseSource("TestPackageCases")]
+        public void QuantumEntanglementExists(string[] packages, int expectedQE)
         {
-            Program.ParseInput(start);
-            Program.Simulate(numIterations, true);
-            Assert.That(Program.CurrentState(0), Is.EqualTo(expectedState));
+            Program.ParseInput(packages, 3);
+            Program.ComputeQEs();
+            Assert.That(Program.QEExists(expectedQE), Is.True);
         }
 
-        [Test]
-        [TestCaseSource("SimulateRecursiveTestCases")]
-        public void SimulateRecursiveTests(string[] start, int depth, string[] expectedState)
+        public static IEnumerable<TestCaseData> SmallestQECases => new[]
         {
-            Program.ParseInput(start);
-            Program.Simulate(10, false);
-            Assert.That(Program.CurrentState(depth), Is.EqualTo(expectedState));
-        }
+            new TestCaseData(TestPackages, 99).SetName("SmallestQE 99"),
+        };
 
         [Test]
-        [TestCaseSource("BioDiversityTestCases")]
-        public void BioDiversityTests(string[] start, int expectedValue)
+        [TestCaseSource("SmallestQECases")]
+        public void SmallestQE(string[] packages, int expectedQE)
         {
-            Program.ParseInput(start);
-            Assert.That(Program.BioDiversityRating, Is.EqualTo(expectedValue));
+            Program.ParseInput(packages, 3);
+            Assert.That(Program.SmallestQE(), Is.EqualTo(expectedQE));
+        }
+
+        public static IEnumerable<TestCaseData> TestPackagePart2Cases => new[]
+        {
+            new TestCaseData(TestPackages, 44).SetName("TestPackagesPart2 QE 44"),
+            new TestCaseData(TestPackages, 45).SetName("TestPackagesPart2 QE 45"),
+            new TestCaseData(TestPackages, 50).SetName("TestPackagesPart2 QE 50"),
+            new TestCaseData(TestPackages, 54).SetName("TestPackagesPart2 QE 54"),
+            new TestCaseData(TestPackages, 56).SetName("TestPackagesPart2 QE 56"),
+            new TestCaseData(TestPackages, 72).SetName("TestPackagesPart2 QE 72"),
+        };
+
+        [Test]
+        [TestCaseSource("TestPackagePart2Cases")]
+        public void QuantumEntanglementExistsPart2(string[] packages, int expectedQE)
+        {
+            Program.ParseInput(packages, 4);
+            Program.ComputeQEs();
+            Assert.That(Program.QEExists(expectedQE), Is.True);
+        }
+
+        public static IEnumerable<TestCaseData> SmallestQEPart2Cases => new[]
+        {
+            new TestCaseData(TestPackages, 44).SetName("SmallestQEPart2 44"),
+        };
+
+        [Test]
+        [TestCaseSource("SmallestQEPart2Cases")]
+        public void SmallestQEPart2(string[] packages, int expectedQE)
+        {
+            Program.ParseInput(packages, 4);
+            Assert.That(Program.SmallestQE(), Is.EqualTo(expectedQE));
         }
     }
 }
