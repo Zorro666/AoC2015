@@ -51,7 +51,7 @@ namespace Day06
             if (part1)
             {
                 var result1 = HowManyLights(instructions, false);
-                long expected = 543903;
+                long expected = 377891;
                 Console.WriteLine($"Day06 : Result1 {result1}");
                 if (result1 != expected)
                 {
@@ -61,7 +61,7 @@ namespace Day06
             else
             {
                 var result2 = HowManyLights(instructions, true);
-                long expected = 14687245;
+                long expected = 14110788;
                 Console.WriteLine($"Day06 : Result2 {result2}");
                 if (result2 != expected)
                 {

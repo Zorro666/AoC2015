@@ -43,7 +43,7 @@ namespace Day03
             if (part1)
             {
                 var result1 = HowManyHousesVisited(moves, false);
-                long expected = 2565;
+                long expected = 2572;
                 Console.WriteLine($"Day03 : Result1 {result1}");
                 if (result1 != expected)
                 {
@@ -53,7 +53,7 @@ namespace Day03
             else
             {
                 var result2 = HowManyHousesVisited(moves, true);
-                long expected = 2639;
+                long expected = 2631;
                 Console.WriteLine($"Day03 : Result2 {result2}");
                 if (result2 != expected)
                 {

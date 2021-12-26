@@ -96,7 +96,7 @@ namespace Day21
             {
                 var result1 = SmallestGoldToWin();
                 Console.WriteLine($"Day21 : Result1 {result1}");
-                var expected = 111;
+                var expected = 91;
                 if (result1 != expected)
                 {
                     throw new InvalidProgramException($"Part1 is broken {result1} != {expected}");
@@ -106,7 +106,7 @@ namespace Day21
             {
                 var result2 = MostGoldToLose();
                 Console.WriteLine($"Day21 : Result2 {result2}");
-                var expected = 188;
+                var expected = 158;
                 if (result2 != expected)
                 {
                     throw new InvalidProgramException($"Part2 is broken {result2} != {expected}");
@@ -335,7 +335,7 @@ namespace Day21
         static bool PlayerWins()
         {
             sPlayerHP = 100;
-            sBossHP = 109;
+            sBossHP = 100;
             return PlayerWins(sPlayerHP, sPlayerAttack, sPlayerArmour, sBossHP, sBossAttack, sBossArmour);
         }
 

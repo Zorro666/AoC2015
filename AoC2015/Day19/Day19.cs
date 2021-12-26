@@ -85,7 +85,7 @@ namespace Day19
             {
                 var result1 = UniqueMolecules();
                 Console.WriteLine($"Day19 : Result1 {result1}");
-                var expected = 509;
+                var expected = 518;
                 if (result1 != expected)
                 {
                     throw new InvalidProgramException($"Part1 is broken {result1} != {expected}");
@@ -95,7 +95,7 @@ namespace Day19
             {
                 var result2 = GenerateCompound();
                 Console.WriteLine($"Day19 : Result2 {result2}");
-                var expected = 195;
+                var expected = 200;
                 if (result2 != expected)
                 {
                     throw new InvalidProgramException($"Part2 is broken {result2} != {expected}");

@@ -62,7 +62,7 @@ namespace Day09
             {
                 var result1 = ShortestRoute();
                 Console.WriteLine($"Day09 : Result1 {result1}");
-                int expected = 207;
+                int expected = 141;
                 if (result1 != expected)
                 {
                     throw new InvalidOperationException($"Part1 is broken {result1} != {expected}");
@@ -72,7 +72,7 @@ namespace Day09
             {
                 var result2 = LongestRoute();
                 Console.WriteLine($"Day09 : Result2 {result2}");
-                int expected = 804;
+                int expected = 736;
                 if (result2 != expected)
                 {
                     throw new InvalidOperationException($"Part2 is broken {result2} != {expected}");

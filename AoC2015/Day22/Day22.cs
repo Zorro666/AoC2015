@@ -170,7 +170,7 @@ namespace Day22
             if (part1)
             {
                 var result1 = LeastManaToWin(0);
-                var expected = 1824;
+                var expected = 1269;
                 Console.WriteLine($"Day22: Result1 {result1}");
                 if (result1 != expected)
                 {
@@ -181,7 +181,7 @@ namespace Day22
             {
                 var result2 = LeastManaToWin(1);
                 Console.WriteLine($"Day22: Result2 {result2}");
-                var expected = 1937;
+                var expected = 1309;
                 if (result2 != expected)
                 {
                     throw new InvalidProgramException($"Part2 is broken {result2} != {expected}");

@@ -51,7 +51,7 @@ namespace Day08
                 (int fileCharacterCount, int memoryCharacterCount) = CountChars(lines);
                 var result1 = fileCharacterCount - memoryCharacterCount;
                 Console.WriteLine($"Day08 : Result1 {result1}");
-                int expected = 1333;
+                int expected = 1342;
                 if (result1 != expected)
                 {
                     throw new InvalidOperationException($"Part1 is broken {result1} != {expected}");
@@ -62,7 +62,7 @@ namespace Day08
                 (int fileCharacterCount, int escapedCharacterCount) = CountCharsEscaped(lines);
                 var result2 = escapedCharacterCount - fileCharacterCount;
                 Console.WriteLine($"Day08 : Result2 {result2}");
-                int expected = 2046;
+                int expected = 2074;
                 if (result2 != expected)
                 {
                     throw new InvalidOperationException($"Part2 is broken {result2} != {expected}");

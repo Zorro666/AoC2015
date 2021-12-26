@@ -44,7 +44,7 @@ namespace Day17
             {
                 var result1 = CountCombinations(lines, 150);
                 Console.WriteLine($"Day17 Result1:{result1}");
-                var expected = 1304;
+                var expected = 1638;
                 if (result1 != expected)
                 {
                     throw new InvalidProgramException($"Part1 is broken {result1} != {expected}");
@@ -54,7 +54,7 @@ namespace Day17
             {
                 var result2 = CountCombinationsMin(lines, 150);
                 Console.WriteLine($"Day17 Result2:{result2}");
-                var expected = 18;
+                var expected = 17;
                 if (result2 != expected)
                 {
                     throw new InvalidProgramException($"Part2 is broken {result2} != {expected}");

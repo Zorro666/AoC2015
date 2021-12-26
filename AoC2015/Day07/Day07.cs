@@ -85,7 +85,7 @@ namespace Day07
                 Program.CreateCircuit(instructions);
                 var result1 = GetWire("a");
                 Console.WriteLine($"Day07 : Result1 {result1}");
-                int expected = 3176;
+                int expected = 956;
                 if (result1 != expected)
                 {
                     throw new InvalidOperationException($"Part1 is broken {result1} != {expected}");
@@ -94,11 +94,11 @@ namespace Day07
             else
             {
                 sOverrideWire = "b";
-                sOverrideValue = 3176;
+                sOverrideValue = 956;
                 Program.CreateCircuit(instructions);
                 var result2 = GetWire("a");
                 Console.WriteLine($"Day07 : Result2 {result2}");
-                int expected = 14710;
+                int expected = 40149;
                 if (result2 != expected)
                 {
                     throw new InvalidOperationException($"Part2 is broken {result2} != {expected}");

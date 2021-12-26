@@ -85,8 +85,8 @@ namespace Day25
         {
             if (part1)
             {
-                var result1 = GetCode(2981, 3075);
-                var expected = 9132360;
+                var result1 = GetCode(3010, 3019);
+                var expected = 8997277;
                 Console.WriteLine($"Day25: Result1 {result1}");
                 if (result1 != expected)
                 {

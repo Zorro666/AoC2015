@@ -36,7 +36,7 @@ After trying every other seating arrangement in this hypothetical scenario, you 
 
 What is the total change in happiness for the optimal seating arrangement of the actual guest list?
 
-Your puzzle answer was 618.
+Your puzzle answer was 664.
 
 --- Part Two ---
 
@@ -69,7 +69,7 @@ namespace Day13
             {
                 var result1 = ComputeOptimum();
                 Console.WriteLine($"Day13 : Result1 {result1}");
-                var expected = 618;
+                var expected = 664;
                 if (result1 != expected)
                 {
                     throw new InvalidOperationException($"Part1 is broken {result1} != {expected}");
@@ -88,7 +88,7 @@ namespace Day13
                 sNames.Add("Jake");
                 var result2 = ComputeOptimum();
                 Console.WriteLine($"Day13 : Result2 {result2}");
-                var expected = 601;
+                var expected = 640;
                 if (result2 != expected)
                 {
                     throw new InvalidOperationException($"Part2 is broken {result2} != {expected}");

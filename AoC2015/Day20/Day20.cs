@@ -47,9 +47,9 @@ namespace Day20
         {
             if (part1)
             {
-                var result1 = FindFirstHouseWithPresents(33100000);
+                var result1 = FindFirstHouseWithPresents(29000000);
                 Console.WriteLine($"Day20 : Result1 {result1}");
-                var expected = 776160;
+                var expected = 665280;
                 if (result1 != expected)
                 {
                     throw new InvalidProgramException($"Part1 is broken {result1} != {expected}");
@@ -57,9 +57,9 @@ namespace Day20
             }
             else
             {
-                var result2 = FindFirstHouseWithPresentsPart2(33100000);
+                var result2 = FindFirstHouseWithPresentsPart2(29000000);
                 Console.WriteLine($"Day20 : Result2 {result2}");
-                var expected = 786240;
+                var expected = 705600;
                 if (result2 != expected)
                 {
                     throw new InvalidProgramException($"Part2 is broken {result2} != {expected}");
